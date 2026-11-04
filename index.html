@@ -1,0 +1,597 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PACE HYROX Tidtagning</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="HYROX Tid">
+<meta name="theme-color" content="#0A0F1C">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&family=Big+Shoulders+Display:wght@700;800;900&display=swap">
+<style>
+/* Layout: tidtagarens arbetsyta på iPad. Stora tryckytor, ett mörkt tema (används i gymlokal), PACE-blå accent. */
+:root{
+  --ink:#0A0F1C; --panel:#111a2c; --panel-2:#172238; --line:#25314c;
+  --text:#eef2fa; --muted:#8e9bb8;
+  --accent:#3ba7e6; --accent-ink:#06121f;
+  --go:#3be08a; --go-ink:#04140b; --warn:#ffcf4a; --danger:#ff5d6c;
+  --font-display:"Big Shoulders Display","Arial Narrow",Impact,sans-serif;
+  --font-body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-num:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--ink);color:var(--text);font-family:var(--font-body);font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased;touch-action:manipulation}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--ink)}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+[hidden]{display:none!important}
+.num{font-family:var(--font-num);font-variant-numeric:tabular-nums}
+
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:color-mix(in srgb,var(--ink) 92%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.wrap{max-width:1240px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.bar{display:flex;align-items:center;gap:14px;padding-block:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px;flex:1;min-width:0}
+.logo{width:44px;height:44px;border-radius:12px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-family:var(--font-display);font-weight:900;font-size:20px;flex:none}
+.brand h1{margin:0;font-family:var(--font-display);font-weight:800;font-size:26px;line-height:1;text-transform:uppercase}
+.brand p{margin:2px 0 0;color:var(--muted);font-size:13px}
+.clock{font-family:var(--font-num);font-weight:700;font-size:34px;line-height:1;font-variant-numeric:tabular-nums}
+.tabs{display:flex;gap:4px;overflow-x:auto;padding-bottom:10px;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{appearance:none;border:0;background:transparent;color:var(--muted);padding:10px 16px;border-radius:999px;font-weight:600;cursor:pointer;white-space:nowrap;min-height:44px}
+.tab[aria-selected="true"]{background:var(--text);color:var(--ink)}
+.tab .cnt{display:inline-block;min-width:1.6em;padding:0 .4em;margin-left:6px;border-radius:999px;background:var(--accent);color:var(--accent-ink);font-size:12px;font-weight:700;text-align:center}
+
+main.wrap{padding-block:20px 90px;display:grid;gap:20px}
+.sec{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;display:grid;gap:14px;min-width:0}
+.sec-h{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.sec-h h2{margin:0;font-family:var(--font-display);font-weight:800;text-transform:uppercase;font-size:24px;line-height:1}
+.sec-h p{margin:4px 0 0;color:var(--muted);font-size:14px;max-width:65ch}
+.eyebrow{font-weight:700;letter-spacing:.14em;text-transform:uppercase;font-size:12px;color:var(--muted)}
+.btn{appearance:none;border:1px solid var(--line);background:var(--panel-2);border-radius:12px;padding:10px 18px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;white-space:nowrap}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.go{background:var(--go);border-color:var(--go);color:var(--go-ink)}
+.btn.ghost{background:transparent}
+.btn.danger{background:transparent;color:var(--danger)}
+.btn.sm{min-height:38px;padding:6px 12px;font-size:14px}
+.btn.big{min-height:64px;font-size:20px;padding:12px 26px;border-radius:14px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.pill.run{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.pill.done{border-color:var(--go);color:var(--go)}
+.muted{color:var(--muted)}
+.note{font-size:14px;color:var(--muted);margin:0;max-width:70ch}
+.empty{padding:20px;border:1px dashed var(--line);border-radius:12px;color:var(--muted);text-align:center}
+
+/* Nästa start */
+.next{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:18px;align-items:center}
+.next .tm{font-family:var(--font-num);font-weight:700;font-size:56px;line-height:.9;font-variant-numeric:tabular-nums}
+.next h3{margin:0;font-family:var(--font-display);font-weight:800;text-transform:uppercase;font-size:30px;line-height:1}
+.next .who{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.next .who span{font-size:14px;padding:4px 10px;border-radius:8px;background:var(--panel-2);border:1px solid var(--line)}
+.next .who b{color:var(--accent);font-family:var(--font-num);margin-right:4px}
+.next .acts{display:grid;gap:10px}
+@media (max-width:760px){.next{grid-template-columns:1fr}}
+
+/* Pågående start */
+.heat-h{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.heat-h h2{margin:0;font-family:var(--font-display);font-weight:800;text-transform:uppercase;font-size:26px;line-height:1}
+.elapsed{font-family:var(--font-num);font-weight:700;font-size:52px;line-height:.85;color:var(--accent);font-variant-numeric:tabular-nums}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,220px),1fr));gap:12px}
+.tile{appearance:none;text-align:left;cursor:pointer;border:2px solid var(--line);background:var(--panel-2);border-radius:16px;padding:14px 16px;min-height:150px;display:flex;flex-direction:column;gap:4px;position:relative;transition:transform .08s}
+.tile:active{transform:scale(.98)}
+.tile .nr{font-family:var(--font-num);font-weight:700;font-size:44px;line-height:.9;color:var(--accent)}
+.tile .cls{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.tile .pp{font-weight:600;font-size:16px;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tile .hint{margin-top:auto;font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.tile.fin{border-color:var(--go);background:color-mix(in srgb,var(--go) 12%,var(--panel-2))}
+.tile.fin .nr{color:var(--go)}
+.tile .res{margin-top:auto;font-family:var(--font-num);font-weight:700;font-size:34px;line-height:1;color:var(--go);font-variant-numeric:tabular-nums}
+.tile.dnf{border-color:var(--danger);opacity:.75}
+.tile.dnf .res{color:var(--danger)}
+.tile.pend{border-color:var(--warn)}
+.tile .ask{position:absolute;inset:0;border-radius:14px;background:color-mix(in srgb,var(--ink) 92%,transparent);display:grid;gap:8px;padding:12px;align-content:center}
+.tba{color:var(--muted);font-style:italic;font-weight:500}
+
+/* Resultat */
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.tblwrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;background:var(--panel-2);white-space:nowrap}
+td.t{font-family:var(--font-num);font-weight:700;font-size:22px;white-space:nowrap}
+td.pl{font-family:var(--font-num);font-weight:700;font-size:22px;width:56px}
+tr.p1 td.pl{color:#f5c542}tr.p2 td.pl{color:#c3cfe2}tr.p3 td.pl{color:#e0905c}
+td input{width:120px;min-height:40px;background:var(--ink);border:1px solid var(--accent);border-radius:8px;padding:6px 8px;font-family:var(--font-num);font-size:20px}
+
+/* Startlista (redigering) */
+label.f{display:grid;gap:6px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);min-width:0}
+input[type=text],input[type=number],input[type=date],input[type=time],textarea{width:100%;background:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-height:46px;font-size:16px;font-weight:500;color:var(--text);text-transform:none;letter-spacing:0}
+textarea{resize:vertical;line-height:1.5;min-height:110px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:12px;align-items:end}
+.hrow{display:grid;grid-template-columns:110px minmax(0,1fr) 150px auto;gap:10px;align-items:end;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--panel-2)}
+.hrow .full{grid-column:1/-1}
+@media (max-width:700px){.hrow{grid-template-columns:1fr 1fr}.hrow>:nth-child(2){grid-column:1/-1;order:-1}}
+.chk{display:flex;align-items:center;gap:10px;font-weight:600;min-height:44px;cursor:pointer}
+.chk input{width:22px;height:22px;accent-color:var(--accent)}
+
+/* Nedräkning */
+#cd{position:fixed;inset:0;z-index:100;display:grid;place-items:center;align-content:center;text-align:center;gap:10px;padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));background:radial-gradient(60% 60% at 50% 50%, color-mix(in srgb,var(--accent) 22%,var(--ink)) 0%, var(--ink) 75%)}
+#cd .lbl{font-weight:700;letter-spacing:.3em;text-transform:uppercase;font-size:clamp(20px,4vw,40px);padding-left:.3em}
+#cd .big{font-family:var(--font-display);font-weight:900;line-height:.85;font-size:min(60vh,55vw);font-variant-numeric:tabular-nums;text-shadow:0 0 6vh color-mix(in srgb,var(--accent) 70%,transparent)}
+#cd .big.hot{color:var(--accent)}
+#cd .big.go{color:var(--go);font-size:min(40vh,30vw)}
+#cd .sub{font-weight:700;letter-spacing:.12em;text-transform:uppercase;font-size:clamp(16px,2.6vw,28px);color:var(--muted)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--text);color:var(--ink);padding:12px 20px;border-radius:999px;font-weight:700;z-index:120;max-width:calc(100% - 32px);text-align:center}
+@media (prefers-reduced-motion:reduce){.tile{transition:none}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="bar">
+      <div class="brand">
+        <div class="logo">P</div>
+        <div style="min-width:0">
+          <h1 id="ev-name">HYROX Simulation</h1>
+          <p id="ev-sub">Tidtagning</p>
+        </div>
+      </div>
+      <div class="clock" id="clock">00:00:00</div>
+    </div>
+    <nav class="tabs" id="tabs" role="tablist"></nav>
+  </div>
+</header>
+<main class="wrap" id="main"></main>
+
+<div id="cd" hidden>
+  <div class="lbl" id="cd-lbl">Startar om</div>
+  <div class="big" id="cd-num">10</div>
+  <div class="sub" id="cd-sub"></div>
+  <div class="row" style="justify-content:center;margin-top:16px">
+    <button class="btn ghost" type="button" data-act="cd-cancel">Avbryt nedräkning</button>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(() => {
+'use strict';
+const KEY = 'pace-hyrox-v1';
+const pad = n => String(n).padStart(2, '0');
+const uid = () => Math.random().toString(36).slice(2, 9);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const $ = s => document.querySelector(s);
+
+/* ---------- Startlista HYROX Simulation 7 nov 2026 ---------- */
+const SEED = [
+ ['08:30',['1 | Single Herr | Philip Ahl','2 | Single Herr | Anders Lövdahl','3 | Single Herr | Oscar Isaksson','4 | Single Herr | Fredrik Andersson']],
+ ['09:00',['5 | Doubles Herr | Michael Nilsson | Martin Kristensson','6 | Doubles Herr | Joakim Petersson | Kristoffer Karlsson','7 | Doubles Herr PRO | Max Quiroga | Marcus Kärrstrand','8 | Doubles Herr PRO | Salim Abdulahad | Joakim Nyman']],
+ ['09:30',['9 | Doubles Herr | Viktor Tuvenäs | XXX','10 | Doubles Herr | Johann Kaiser | Björn Karlsson','11 | Doubles Herr | Ingvar Johansson | Anton Kristensson','12 | Doubles Herr | Goran Edenro | Krister Syrten']],
+ ['10:00',['13 | Single Dam | Emma Larsson','14 | Single Dam | Jessica Carlsson','15 | Single Dam | Anne Edenro','16 | Doubles Dam | Malin Kaiser | Charlotte Karlsson']],
+ ['10:30',['17 | Doubles Dam | Josefine Rosander | Amanda Svensson','18 | Doubles Dam | Caroline Öhagen | XXX','19 | Doubles Dam | Linn Hultfeldt | Jennie Javette','20 | Doubles Dam | Linnéa Andersson | Alice Klinteby']],
+ ['11:00',['21 | Doubles Dam | Sandra Skattberg | Kajsa Karlsson','22 | Doubles Dam | Ebba Berndtsson | Amanda Nagy','23 | Doubles Dam | Line Nygård | Ida Möller','24 | Doubles Dam | Susanne Hedberg | Anneli Olsson']],
+ ['11:30',['25 | Doubles Dam | Josefin Nygren | Anna Lindqvist','26 | Doubles Dam | Nadia Andersson | Linn Sidahl','27 | Doubles Dam | Elin Wadell | XXX','28 | Doubles Dam | Caroline Kassell | XXX']],
+ ['12:00',['29 | Doubles Dam | Ella Daneshmand | Evelina Montgomery','30 | Doubles Dam | Lina Andersson | XXX','31 | Doubles Dam | Helen Lindén | XXX','32 | Doubles Dam | Ellen Rundbäck | Stina Rehnqvist']],
+ ['12:30',['33 | Doubles Dam | Emma Rignell | Amanda Hansson','34 | Doubles Dam | Johanna Lindberg | XXX','35 | Doubles Mixed | Linda Thernell | Jonas Öjvik','36 | Doubles Mixed | Lina Oliw | Mikael Oliw']],
+ ['13:00',['37 | Doubles Mixed | Kristian Gustavasson | Rebecka Borglund','38 | Doubles Mixed | Mattias Olsson | Anna-Maria Olsson','39 | Doubles Mixed | Robin Demén | XXX','40 | Doubles Herr | Mattias Helde | Mathias Hilding Borg']],
+ ['13:30',['41 | Doubles Mixed | Jacob Medes | Charlotte Holmquist','42 | Doubles Mixed | Ida axelsson | Magnus Axelsson','43 | Doubles Mixed | Patricia Ynner | Robin Johansson','44 | Doubles Mixed | Sandra Lundahl | Sebastian Josefsson']],
+ ['14:00',['45 | Doubles Mixed | Sofia Torstensson | Nicholas Johansson','46 | Doubles Mixed | Hampus von Platen | Jenny von Platen','47 | Doubles Mixed | William Wallsin | Rebecka Mikkonen','48 | Doubles Mixed | Anh Tran | Nina Tran']],
+ ['14:30',['49 | Doubles Mixed | Christer Sandberg | XXX','50 | Doubles Mixed | Marlene Nilsson | Thomas Erixon','51 | Doubles Mixed | Andreas Söderström | Gisela Söderström','52 | Single Herr | Olof Oljelund']],
+];
+const seed = () => ({
+  v: 1,
+  event: { name:'HYROX Simulation', date:'2026-11-07', interval:30, countdown:10, sound:true },
+  heats: SEED.map(([time, rows], i) => ({ id:uid(), title:`Start ${i+1}`, time, lanes:rows.join('\n'), startedAt:null })),
+  res: {},   // nyckel: startnummer -> { fin: tidsstämpel ms, dnf: bool }
+});
+
+let state;
+function load() {
+  try { const r = localStorage.getItem(KEY); if (r) state = JSON.parse(r); } catch (e) {}
+  if (!state || !state.heats) state = seed();
+  state.event = Object.assign(seed().event, state.event);
+  state.res = state.res || {};
+}
+function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { toast('Kunde inte spara – kontrollera att privat surfning är av'); } }
+
+/* ---------- Hjälpfunktioner ---------- */
+function parseEntry(line, i) {
+  const p = line.split('|').map(t => t.trim());
+  if (p.length >= 3) return { nr:p[0] || String(i+1), cls:p[1], people:p.slice(2).filter(Boolean) };
+  return { nr:String(i+1), cls:'', people:[line.trim()] };
+}
+const entriesOf = h => (h.lanes || '').split('\n').filter(t => t.trim()).map(parseEntry);
+const isTBA = n => /^x{2,}$/i.test(n);
+const peopleHtml = e => e.people.map(n => isTBA(n) ? '<div class="pp tba">Partner TBA</div>' : `<div class="pp">${esc(n)}</div>`).join('');
+const names = e => e.people.map(n => isTBA(n) ? 'Partner TBA' : n).join(' & ');
+function fmtTime(ms) {
+  if (ms == null || ms < 0) ms = 0;
+  const s = Math.floor(ms / 1000), h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60);
+  return h ? `${h}:${pad(m)}:${pad(s % 60)}` : `${m}:${pad(s % 60)}`;
+}
+const fmtClock = (t, sec) => { const d = new Date(t); return `${pad(d.getHours())}:${pad(d.getMinutes())}${sec ? ':' + pad(d.getSeconds()) : ''}`; };
+function fmtDur(ms) { const m = Math.round(ms / 60000), h = Math.floor(m / 60); return h ? `${h} h${m % 60 ? ' ' + m % 60 + ' min' : ''}` : `${m} min`; }
+const toMin = s => { const m = /^(\d{1,2})[:.](\d{2})/.exec(s || ''); return m ? +m[1] * 60 + +m[2] : null; };
+function parseDur(s) {  // "1:05:23" eller "65:23" -> ms
+  const p = String(s).trim().split(/[:.]/).map(Number);
+  if (!p.length || p.some(isNaN) || p.length > 3) return null;
+  return p.reduce((a, x) => a * 60 + x, 0) * 1000;
+}
+function heatStatus(h) {
+  if (!h.startedAt) return 'wait';
+  const es = entriesOf(h);
+  return es.length && es.every(e => state.res[e.nr]?.fin || state.res[e.nr]?.dnf) ? 'done' : 'run';
+}
+const plannedSpan = () => {
+  const ms = state.heats.map(h => toMin(h.time)).filter(x => x != null);
+  if (!ms.length) return null;
+  const a = Math.min(...ms), b = Math.max(...ms) + (+state.event.interval || 30);
+  return { a, b, ms:(b - a) * 60000 };
+};
+const minTxt = m => `${pad(Math.floor(m / 60) % 24)}:${pad(m % 60)}`;
+
+/* ---------- Ljud ---------- */
+let audio;
+function beep(f, d) {
+  if (!state.event.sound) return;
+  try {
+    audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+    const o = audio.createOscillator(), g = audio.createGain();
+    o.type = 'square'; o.frequency.value = f; g.gain.value = .14;
+    o.connect(g); g.connect(audio.destination); o.start(); o.stop(audio.currentTime + d);
+  } catch (e) {}
+}
+
+/* ---------- UI ---------- */
+const ui = { tab:'tid', cls:'', pending:null, pendT:null, editing:null, cd:null };
+let toastT;
+function toast(m) { const t = $('#toast'); t.textContent = m; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => t.hidden = true, 2600); }
+
+function renderTabs() {
+  const running = state.heats.filter(h => heatStatus(h) === 'run').length;
+  const T = [['tid', 'Tidtagning', running], ['res', 'Resultat'], ['lista', 'Startlista'], ['inst', 'Inställningar']];
+  $('#tabs').innerHTML = T.map(([k, l, n]) => `<button class="tab" role="tab" type="button" aria-selected="${ui.tab === k}" data-act="tab" data-tab="${k}">${l}${n ? `<span class="cnt">${n}</span>` : ''}</button>`).join('');
+}
+function render() {
+  $('#ev-name').textContent = state.event.name || 'HYROX Simulation';
+  const d = state.event.date ? new Date(state.event.date + 'T12:00').toLocaleDateString('sv-SE', { weekday:'long', day:'numeric', month:'long' }) : '';
+  const sp = plannedSpan();
+  $('#ev-sub').textContent = [d, sp && `Aktivt ${minTxt(sp.a)}–${minTxt(sp.b)} · ${fmtDur(sp.ms)}`].filter(Boolean).join(' · ');
+  renderTabs();
+  $('#main').innerHTML = V[ui.tab]();
+  tick();
+}
+
+const V = {
+  tid() {
+    const waiting = state.heats.filter(h => !h.startedAt);
+    const running = state.heats.filter(h => heatStatus(h) === 'run').sort((a, b) => a.startedAt - b.startedAt);
+    const done = state.heats.filter(h => heatStatus(h) === 'done');
+    const nx = waiting[0];
+    let html = '';
+    if (nx) {
+      const es = entriesOf(nx);
+      html += `<section class="sec"><div class="next">
+        <div style="min-width:0">
+          <div class="eyebrow">Nästa start · planerad</div>
+          <div class="row" style="align-items:baseline;gap:16px;margin-top:6px"><div class="tm">${esc(nx.time)}</div><h3>${esc(nx.title)}</h3><span class="muted js-until" data-min="${toMin(nx.time) ?? ''}"></span></div>
+          <div class="who">${es.map(e => `<span><b>${esc(e.nr)}</b>${esc(names(e))}</span>`).join('')}</div>
+        </div>
+        <div class="acts">
+          <button class="btn primary big" type="button" data-act="cd-start" data-id="${nx.id}">Nedräkning ${+state.event.countdown || 10} s</button>
+          <button class="btn go" type="button" data-act="start-now" data-id="${nx.id}">Starta direkt</button>
+        </div>
+      </div></section>`;
+    } else if (!running.length) {
+      html += `<section class="sec"><div class="empty">Alla starter är klara. Resultaten finns under <b>Resultat</b>.</div></section>`;
+    }
+    for (const h of running) {
+      const es = entriesOf(h), fin = es.filter(e => state.res[e.nr]?.fin || state.res[e.nr]?.dnf).length;
+      html += `<section class="sec">
+        <div class="heat-h">
+          <div><div class="eyebrow">Pågår · startade ${fmtClock(h.startedAt, true)} · ${fin}/${es.length} i mål</div><h2>${esc(h.title)} <span class="muted" style="font-size:.7em">${esc(h.time)}</span></h2></div>
+          <div class="elapsed js-el" data-from="${h.startedAt}">0:00</div>
+        </div>
+        <div class="tiles">${es.map(e => tile(h, e)).join('')}</div>
+        <div class="row" style="justify-content:flex-end"><button class="btn danger sm" type="button" data-act="ask-reset" data-id="${h.id}">Felstart – nollställ start</button></div>
+      </section>`;
+    }
+    if (done.length) {
+      html += `<section class="sec"><div class="sec-h"><div><h2>Klara starter</h2></div></div>
+        <div class="row">${done.map(h => `<span class="pill done">${esc(h.title)} ✓</span>`).join('')}</div></section>`;
+    }
+    if (waiting.length > 1) {
+      html += `<section class="sec"><div class="sec-h"><h2>Kommande</h2></div>
+        <div class="row">${waiting.slice(1).map(h => `<span class="pill">${esc(h.time)} · ${esc(h.title)} · ${entriesOf(h).length} st</span>`).join('')}</div>
+        <p class="note">Ska en annan start gå före? Starta den under <b>Startlista</b>.</p></section>`;
+    }
+    return html;
+  },
+
+  res() {
+    const rows = allResults();
+    const classes = [...new Set(rows.map(r => r.e.cls).filter(Boolean))];
+    if (ui.cls && !classes.includes(ui.cls)) ui.cls = '';
+    const list = ui.cls ? rows.filter(r => r.e.cls === ui.cls) : rows;
+    const finished = rows.filter(r => r.ms != null).length;
+    return `<section class="sec">
+      <div class="sec-h"><div><h2>Resultat</h2><p>${finished} av ${rows.length} i mål. Placering räknas inom klassen. Tryck på ✎ för att rätta en tid.</p></div>
+        <button class="btn sm" type="button" data-act="csv">Exportera CSV</button></div>
+      <div class="chips"><button class="tab" type="button" aria-selected="${!ui.cls}" data-act="cls" data-cls="">Alla</button>${classes.map(c => `<button class="tab" type="button" aria-selected="${ui.cls === c}" data-act="cls" data-cls="${esc(c)}">${esc(c)}</button>`).join('')}</div>
+      <div class="tblwrap"><table>
+        <thead><tr><th>Plac</th><th>Nr</th><th>Deltagare</th><th>Klass</th><th>Start</th><th>Tid</th><th></th></tr></thead>
+        <tbody>${list.map(r => `<tr class="${r.place ? 'p' + r.place : ''}">
+          <td class="pl">${r.place ?? ''}</td>
+          <td class="num" style="font-weight:700;font-size:18px">${esc(r.e.nr)}</td>
+          <td>${esc(names(r.e))}</td>
+          <td class="muted">${esc(r.e.cls)}</td>
+          <td class="muted num">${esc(r.h.title)}</td>
+          <td class="t">${ui.editing === r.e.nr
+              ? `<input id="f-edit" type="text" inputmode="numeric" value="${r.ms != null ? fmtTime(r.ms) : ''}" placeholder="h:mm:ss" data-nr="${esc(r.e.nr)}">`
+              : r.dnf ? '<span style="color:var(--danger)">DNF</span>' : r.ms != null ? fmtTime(r.ms) : `<span class="muted" style="font-size:16px;font-weight:600">${r.h.startedAt ? 'Pågår' : 'Ej startat'}</span>`}</td>
+          <td>${ui.editing === r.e.nr ? `<button class="btn sm primary" type="button" data-act="edit-save" data-nr="${esc(r.e.nr)}">Spara</button>` : r.h.startedAt ? `<button class="btn sm ghost" type="button" data-act="edit" data-nr="${esc(r.e.nr)}" aria-label="Rätta tid">✎</button>` : ''}</td>
+        </tr>`).join('')}</tbody></table></div>
+    </section>`;
+  },
+
+  lista() {
+    const ev = state.event;
+    const rows = state.heats.map((h, i) => {
+      const st = heatStatus(h);
+      return `<div class="hrow">
+        <label class="f">Planerad tid<input id="f-h${i}-time" type="time" data-path="heats.${i}.time" value="${esc(h.time)}"></label>
+        <label class="f">Namn<input id="f-h${i}-title" type="text" data-path="heats.${i}.title" value="${esc(h.title)}"></label>
+        <label class="f">Faktisk start<input id="f-h${i}-start" type="time" step="1" data-start="${i}" value="${h.startedAt ? fmtClock(h.startedAt, true) : ''}"></label>
+        <div class="row" style="padding-bottom:4px">${st === 'wait' ? `<button class="btn sm go" type="button" data-act="start-now" data-id="${h.id}">Starta</button>` : `<span class="pill ${st === 'run' ? 'run' : 'done'}">${st === 'run' ? 'Pågår' : 'Klar'}</span>`}
+          <button class="btn sm danger" type="button" data-act="del-heat" data-i="${i}" aria-label="Ta bort start">✕</button></div>
+        <label class="f full">Startande · Nr | Klass | Deltagare 1 | Deltagare 2 (en per rad)<textarea id="f-h${i}-lanes" rows="4" data-path="heats.${i}.lanes">${esc(h.lanes)}</textarea></label>
+      </div>`;
+    }).join('');
+    const total = state.heats.reduce((n, h) => n + entriesOf(h).length, 0);
+    const sp = plannedSpan();
+    return `<section class="sec">
+      <div class="sec-h"><div><h2>Startlista</h2><p>Ändringar sparas direkt. <b>Faktisk start</b> fylls i automatiskt när du startar. Rätta den här om någon start glömdes bort.</p></div></div>
+      <div class="grid">
+        <label class="f">Första start<input id="f-first" type="time" value="${esc(state.heats[0]?.time || '08:30')}"></label>
+        <label class="f">Minuter mellan starter<input id="f-int" type="number" inputmode="numeric" min="1" data-path="event.interval" value="${esc(ev.interval)}"></label>
+        <button class="btn" type="button" data-act="gen">Sätt planerade tider</button>
+      </div>
+      <div class="row"><span class="pill">${state.heats.length} starter</span><span class="pill">${total} startnummer</span>${sp ? `<span class="pill run">Aktivt ${minTxt(sp.a)}–${minTxt(sp.b)} · ${fmtDur(sp.ms)}</span>` : ''}</div>
+      <div style="display:grid;gap:10px">${rows || '<div class="empty">Inga starter.</div>'}</div>
+      <div><button class="btn sm" type="button" data-act="add-heat">+ Lägg till start</button></div>
+    </section>`;
+  },
+
+  inst() {
+    const ev = state.event;
+    return `<section class="sec"><div class="sec-h"><h2>Event</h2></div>
+      <div class="grid">
+        <label class="f">Namn<input id="f-name" type="text" data-path="event.name" value="${esc(ev.name)}"></label>
+        <label class="f">Datum<input id="f-date" type="date" data-path="event.date" value="${esc(ev.date)}"></label>
+        <label class="f">Nedräkning (sekunder)<input id="f-cd" type="number" inputmode="numeric" min="3" max="120" data-path="event.countdown" value="${esc(ev.countdown)}"></label>
+      </div>
+      <label class="chk"><input id="f-sound" type="checkbox" data-path="event.sound"${ev.sound ? ' checked' : ''}> Pip de sista 3 sekunderna och vid start</label>
+    </section>
+    <section class="sec"><div class="sec-h"><div><h2>Backup</h2><p>Allt sparas automatiskt på den här iPaden. Exportera en backup under dagen så att inga tider försvinner.</p></div></div>
+      <div class="row">
+        <button class="btn" type="button" data-act="backup">Ladda ner backup</button>
+        <button class="btn" type="button" data-act="csv">Exportera resultat (CSV)</button>
+        <label class="btn" for="f-import">Läs in backup</label><input id="f-import" type="file" accept=".json,application/json" hidden>
+      </div>
+    </section>
+    <section class="sec"><div class="sec-h"><div><h2>Nollställ</h2><p>Används för att testa innan eventet. Startlistan finns kvar.</p></div></div>
+      <div class="row" id="reset-box">
+        <button class="btn danger" type="button" data-act="ask-clear-times">Rensa alla tider</button>
+        <button class="btn ghost" type="button" data-act="ask-seed">Återställ originalstartlistan</button>
+      </div>
+    </section>`;
+  },
+};
+
+function tile(h, e) {
+  const r = state.res[e.nr] || {};
+  const pend = ui.pending === e.nr;
+  const cls = r.dnf ? 'dnf' : r.fin ? 'fin' : '';
+  const body = `<div class="nr">${esc(e.nr)}</div><div class="cls">${esc(e.cls)}</div>${peopleHtml(e)}`
+    + (r.dnf ? '<div class="res">DNF</div>' : r.fin ? `<div class="res">${fmtTime(r.fin - h.startedAt)}</div>` : '<div class="hint">Tryck vid målgång</div>');
+  const ask = pend ? `<div class="ask">
+      ${r.fin || r.dnf ? `<button class="btn danger sm" type="button" data-act="undo" data-nr="${esc(e.nr)}">Ångra ${r.dnf ? 'DNF' : 'målgång'}</button>`
+                       : `<button class="btn danger sm" type="button" data-act="dnf" data-nr="${esc(e.nr)}">Bröt loppet (DNF)</button>`}
+      <button class="btn sm" type="button" data-act="unpend">Behåll</button></div>` : '';
+  return `<div class="tile ${cls} ${pend ? 'pend' : ''}" role="button" tabindex="0" data-act="tap" data-nr="${esc(e.nr)}" data-heat="${h.id}">${body}${ask}</div>`;
+}
+
+function allResults() {
+  const rows = [];
+  for (const h of state.heats) for (const e of entriesOf(h)) {
+    const r = state.res[e.nr] || {};
+    rows.push({ h, e, dnf:!!r.dnf, ms: (!r.dnf && r.fin && h.startedAt) ? r.fin - h.startedAt : null });
+  }
+  // placering inom klass
+  const byCls = {};
+  for (const r of rows) if (r.ms != null) (byCls[r.e.cls] = byCls[r.e.cls] || []).push(r);
+  for (const list of Object.values(byCls)) list.sort((a, b) => a.ms - b.ms).forEach((r, i) => r.place = i + 1);
+  const rank = r => r.ms != null ? 0 : r.h.startedAt && !r.dnf ? 1 : r.dnf ? 3 : 2;
+  return rows.sort((a, b) => rank(a) - rank(b) || (a.ms ?? 0) - (b.ms ?? 0) || (+a.e.nr - +b.e.nr));
+}
+
+/* ---------- Start & nedräkning ---------- */
+function startHeat(id, at) {
+  const h = state.heats.find(x => x.id === id); if (!h || h.startedAt) return;
+  h.startedAt = at || Date.now(); save();
+  toast(`${h.title} startad ${fmtClock(h.startedAt, true)}`);
+  ui.tab = 'tid'; render();
+}
+function beginCountdown(id) {
+  const h = state.heats.find(x => x.id === id); if (!h) return;
+  try { audio = audio || new (window.AudioContext || window.webkitAudioContext)(); audio.resume?.(); } catch (e) {}
+  ui.cd = { id, target: Date.now() + (+state.event.countdown || 10) * 1000, last:null, goUntil:null };
+  $('#cd-sub').textContent = `${h.title} · ${entriesOf(h).map(e => e.nr).join(', ')}`;
+  $('#cd').hidden = false; tick();
+}
+function cdTick() {
+  const c = ui.cd; if (!c) return;
+  const now = Date.now(), num = $('#cd-num');
+  if (c.goUntil) { if (now > c.goUntil) { ui.cd = null; $('#cd').hidden = true; render(); } return; }
+  const ms = c.target - now;
+  if (ms > 0) {
+    const s = Math.ceil(ms / 1000);
+    $('#cd-lbl').textContent = 'Startar om';
+    if (num.textContent !== String(s)) { num.textContent = s; num.className = 'big' + (s <= 3 ? ' hot' : ''); if (s <= 3 && c.last !== s) { c.last = s; beep(660, .15); } }
+  } else {
+    startHeat(c.id, c.target);           // exakt tidpunkt när nedräkningen nådde 0
+    $('#cd-lbl').textContent = ''; num.textContent = 'KÖR!'; num.className = 'big go';
+    beep(990, .7); c.goUntil = now + 2000;
+  }
+}
+
+/* ---------- Tick ---------- */
+function tick() {
+  const now = Date.now();
+  $('#clock').textContent = fmtClock(now, true);
+  document.querySelectorAll('.js-el').forEach(e => e.textContent = fmtTime(now - +e.dataset.from));
+  document.querySelectorAll('.js-until').forEach(e => {
+    const m = +e.dataset.min; if (!e.dataset.min) return;
+    const d = new Date(state.event.date + 'T00:00'); d.setHours(0, m, 0, 0);
+    const diff = d - now;
+    e.textContent = diff > 0 && diff < 6 * 3600000 ? `om ${fmtTime(diff)}` : diff <= 0 && diff > -3600000 ? `${fmtTime(-diff)} sen` : '';
+  });
+  cdTick();
+}
+setInterval(tick, 200);
+
+/* ---------- Händelser ---------- */
+function setPath(p, v) { const k = p.split('.'); let o = state; for (let i = 0; i < k.length - 1; i++) o = o[k[i]]; o[k[k.length - 1]] = v; }
+document.addEventListener('input', e => {
+  const el = e.target;
+  if (el.dataset.path) {
+    let v = el.type === 'checkbox' ? el.checked : el.value;
+    if (el.type === 'number') v = el.value === '' ? '' : Number(el.value);
+    setPath(el.dataset.path, v); save();
+    if (el.dataset.path.startsWith('event.')) { $('#ev-name').textContent = state.event.name; }
+  }
+});
+document.addEventListener('change', e => {
+  const el = e.target;
+  if (el.dataset.start != null) {
+    const h = state.heats[+el.dataset.start];
+    if (!el.value) { if (h.startedAt) { toast('Använd Felstart för att nollställa en start'); el.value = fmtClock(h.startedAt, true); } return; }
+    const [H, M, S] = el.value.split(':').map(Number);
+    const base = h.startedAt ? new Date(h.startedAt) : new Date();
+    base.setHours(H, M, S || 0, 0);
+    h.startedAt = base.getTime(); save(); toast(`Starttid för ${h.title}: ${fmtClock(h.startedAt, true)}`); render();
+  }
+  if (el.dataset.path === 'event.date' || el.dataset.path === 'event.interval' || (el.dataset.path || '').endsWith('.lanes') || (el.dataset.path || '').endsWith('.time')) render();
+  if (el.id === 'f-import' && el.files[0]) {
+    const fr = new FileReader();
+    fr.onload = () => { try { const d = JSON.parse(fr.result); if (!d.heats) throw 0; state = d; load2(); save(); render(); toast('Backup inläst'); } catch (x) { toast('Filen gick inte att läsa. Välj en backup från den här appen.'); } };
+    fr.readAsText(el.files[0]);
+  }
+});
+function load2() { state.event = Object.assign(seed().event, state.event); state.res = state.res || {}; }
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.target.id === 'f-edit') saveEdit(e.target.dataset.nr);
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.classList?.contains('tile')) { e.preventDefault(); e.target.click(); }
+});
+function saveEdit(nr) {
+  const inp = $('#f-edit'); const r = allResults().find(x => x.e.nr === nr);
+  if (!inp || !r) return;
+  const v = inp.value.trim().toUpperCase();
+  if (!v) delete state.res[nr];
+  else if (v === 'DNF') state.res[nr] = { dnf:true };
+  else { const ms = parseDur(v); if (ms == null) { toast('Skriv tiden som h:mm:ss, t.ex. 1:05:23'); return; } state.res[nr] = { fin: r.h.startedAt + ms }; }
+  ui.editing = null; save(); render(); toast(`Tid för nr ${nr} sparad`);
+}
+function download(name, text, type) {
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type })); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+}
+function setPending(nr) {
+  ui.pending = nr; clearTimeout(ui.pendT);
+  if (nr) ui.pendT = setTimeout(() => { ui.pending = null; if (ui.tab === 'tid') render(); }, 5000);
+  render();
+}
+
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  const a = b.dataset.act;
+  if (a === 'tab') { ui.tab = b.dataset.tab; ui.editing = null; render(); scrollTo(0, 0); }
+  else if (a === 'tap') {
+    const nr = b.dataset.nr, r = state.res[nr];
+    if (ui.pending === nr) return;
+    if (r && (r.fin || r.dnf)) { setPending(nr); return; }
+    state.res[nr] = { fin: Date.now() }; save(); beep(880, .08);
+    const h = state.heats.find(x => x.id === b.dataset.heat);
+    toast(`Nr ${nr} i mål: ${fmtTime(state.res[nr].fin - h.startedAt)}`);
+    setPending(null);
+  }
+  else if (a === 'undo') { delete state.res[b.dataset.nr]; save(); toast(`Nr ${b.dataset.nr} återställd`); setPending(null); }
+  else if (a === 'dnf') { state.res[b.dataset.nr] = { dnf:true }; save(); setPending(null); }
+  else if (a === 'unpend') setPending(null);
+  else if (a === 'cd-start') beginCountdown(b.dataset.id);
+  else if (a === 'cd-cancel') { ui.cd = null; $('#cd').hidden = true; render(); }
+  else if (a === 'start-now') startHeat(b.dataset.id);
+  else if (a === 'ask-reset') {
+    b.outerHTML = `<span class="row"><span>Nollställ starten och alla tider i den?</span><button class="btn danger sm" type="button" data-act="reset" data-id="${b.dataset.id}">Ja, nollställ</button><button class="btn sm" type="button" data-act="tab" data-tab="tid">Avbryt</button></span>`;
+  }
+  else if (a === 'reset') {
+    const h = state.heats.find(x => x.id === b.dataset.id);
+    h.startedAt = null; for (const en of entriesOf(h)) delete state.res[en.nr];
+    save(); render(); toast(`${h.title} nollställd`);
+  }
+  else if (a === 'cls') { ui.cls = b.dataset.cls; render(); }
+  else if (a === 'edit') { ui.editing = b.dataset.nr; render(); const i = $('#f-edit'); i?.focus(); i?.select(); }
+  else if (a === 'edit-save') saveEdit(b.dataset.nr);
+  else if (a === 'gen') {
+    const f = toMin($('#f-first').value), step = +state.event.interval || 30;
+    if (f == null) { toast('Ange första starttid'); return; }
+    state.heats.forEach((h, i) => h.time = minTxt(f + i * step)); save(); render(); toast(`Planerade tider satta, ${step} min mellan`);
+  }
+  else if (a === 'add-heat') {
+    const last = state.heats[state.heats.length - 1], m = toMin(last?.time);
+    state.heats.push({ id:uid(), title:`Start ${state.heats.length + 1}`, time: m != null ? minTxt(m + (+state.event.interval || 30)) : '08:30', lanes:'', startedAt:null });
+    save(); render();
+  }
+  else if (a === 'del-heat') {
+    const h = state.heats[+b.dataset.i];
+    if (h.startedAt) { toast('Starten har gått. Nollställ den först under Tidtagning.'); return; }
+    state.heats.splice(+b.dataset.i, 1); save(); render(); toast(`${h.title} borttagen`);
+  }
+  else if (a === 'csv') {
+    const rows = allResults();
+    const lines = [['Placering i klass', 'Nr', 'Klass', 'Deltagare', 'Start', 'Starttid', 'Tid'].join(';')]
+      .concat(rows.map(r => [r.place ?? '', r.e.nr, r.e.cls, names(r.e), r.h.title, r.h.startedAt ? fmtClock(r.h.startedAt, true) : '', r.dnf ? 'DNF' : r.ms != null ? fmtTime(r.ms) : ''].map(x => `"${String(x).replace(/"/g, '""')}"`).join(';')));
+    download(`hyrox-resultat-${state.event.date || 'event'}.csv`, '﻿' + lines.join('\n'), 'text/csv');
+  }
+  else if (a === 'backup') download(`hyrox-backup-${fmtClock(Date.now()).replace(':', '')}.json`, JSON.stringify(state, null, 2), 'application/json');
+  else if (a === 'ask-clear-times' || a === 'ask-seed') {
+    const q = a === 'ask-seed' ? 'Ersätt startlistan med originalet och rensa alla tider?' : 'Rensa alla starter och tider?';
+    $('#reset-box').innerHTML = `<span>${q} Det går inte att ångra.</span><button class="btn danger" type="button" data-act="${a.slice(4)}">Ja</button><button class="btn ghost" type="button" data-act="tab" data-tab="inst">Avbryt</button>`;
+  }
+  else if (a === 'clear-times') { state.heats.forEach(h => h.startedAt = null); state.res = {}; save(); render(); toast('Alla tider rensade'); }
+  else if (a === 'seed') { const ev = state.event; state = seed(); state.event = ev; save(); render(); toast('Originalstartlistan återställd'); }
+});
+
+// Håll skärmen vaken under tidtagning
+function wake() { navigator.wakeLock?.request('screen').catch(() => {}); }
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { wake(); render(); } });
+document.addEventListener('pointerdown', wake, { once:true });
+// Varna om man stänger fliken under pågående lopp
+window.addEventListener('beforeunload', e => { if (state.heats.some(h => heatStatus(h) === 'run')) { e.preventDefault(); e.returnValue = ''; } });
+
+load(); render();
+if ('serviceWorker' in navigator && location.protocol === 'https:' && !/claude|anthropic/.test(location.hostname)) navigator.serviceWorker.register('sw.js').catch(() => {});
+})();
+</script>
+</body>
+</html>
