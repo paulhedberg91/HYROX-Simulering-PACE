@@ -158,10 +158,13 @@ textarea{resize:vertical;line-height:1.5;min-height:110px}
 #cd>*:not(.ring){position:relative}
 /* GOGO! */
 #cd.gogo{animation:cdshake .4s linear 3}
+#cd.gogo{--yel:#ffd60a;background:radial-gradient(60% 60% at 50% 50%, color-mix(in srgb,var(--yel) 30%,var(--ink)) 0%, color-mix(in srgb,var(--go) 35%,var(--ink)) 75%)}
 #cd.gogo::before{animation:gostrobe .16s steps(1) 10,gofade 1.4s ease-out 1.6s forwards}
-@keyframes gostrobe{0%{opacity:.95;background:var(--go)}50%{opacity:.9;background:#fff}}
-@keyframes gofade{0%{opacity:.6;background:var(--go)}100%{opacity:.18;background:var(--go)}}
-#cd .big.go{font-size:min(44vh,33vw);letter-spacing:.01em;color:#fff;-webkit-text-stroke:.6vmin #04140b;text-shadow:0 0 3vmin var(--go),0 0 9vmin var(--go),0 0 18vmin var(--go);animation:gozoom .6s cubic-bezier(.2,1.6,.4,1),gopulse .5s ease-in-out .6s infinite alternate}
+@keyframes gostrobe{0%{opacity:.95;background:var(--go)}50%{opacity:.95;background:var(--yel)}}
+@keyframes gofade{0%{opacity:.6;background:var(--go)}100%{opacity:.2;background:var(--go)}}
+#cd .ring.yel{border-color:var(--yel);box-shadow:0 0 4vmin var(--yel),inset 0 0 4vmin var(--yel)}
+#cd .big.go{font-size:min(44vh,33vw);letter-spacing:.01em;color:var(--yel);-webkit-text-stroke:.6vmin #04140b;text-shadow:0 0 3vmin var(--go),0 0 9vmin var(--go),0 0 18vmin var(--go);animation:gozoom .6s cubic-bezier(.2,1.6,.4,1),gopulse .5s ease-in-out .6s infinite alternate,gotext .3s steps(1) .6s infinite}
+@keyframes gotext{0%{color:var(--yel);text-shadow:0 0 3vmin var(--go),0 0 9vmin var(--go),0 0 18vmin var(--go)}50%{color:var(--go);text-shadow:0 0 3vmin var(--yel),0 0 9vmin var(--yel),0 0 18vmin var(--yel)}}
 @keyframes gozoom{0%{transform:scale(3.5) rotate(-6deg);opacity:0}100%{transform:none;opacity:1}}
 @keyframes gopulse{from{transform:scale(1)}to{transform:scale(1.07)}}
 #cd .lbl{font-weight:700;letter-spacing:.3em;text-transform:uppercase;font-size:clamp(20px,4vw,40px);padding-left:.3em}
@@ -502,9 +505,9 @@ function cdColor(c, urgent) {   // byt färg, blixt + chockvåg varje sekund
   if (urgent) el.classList.add('urgent');
   ring(0); if (urgent) ring(180);
 }
-function ring(delay) {
+function ring(delay, cls) {
   setTimeout(() => {
-    const r = document.createElement('div'); r.className = 'ring';
+    const r = document.createElement('div'); r.className = 'ring' + (cls ? ' ' + cls : '');
     r.addEventListener('animationend', () => r.remove());
     $('#cd').appendChild(r);
   }, delay);
@@ -514,7 +517,7 @@ function gogo() {
   el.classList.remove('flash', 'urgent', 'c-blue', 'c-orange');
   void el.offsetWidth;
   el.classList.add('c-green', 'gogo');
-  [0, 120, 240, 420, 650].forEach(ring);
+  [0, 120, 240, 420, 650].forEach((t, i) => ring(t, i % 2 ? 'yel' : ''));
   [[880, 0], [880, 160], [1320, 320]].forEach(([f, t]) => setTimeout(() => beep(f, t === 320 ? .8 : .12), t));
 }
 function cdTick() {
