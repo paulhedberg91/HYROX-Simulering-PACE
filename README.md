@@ -4,7 +4,7 @@ Tidtagning, heatlistor och nedräkning till starter för PACE HYROX Simulation (
 En webbapp för iPad, i en enda fil (`index.html`). Ingen installation och inga beroenden.
 
 ## Så funkar det på eventdagen
-1. **Tidtagning → Nästa start.** Tryck **Nedräkning 10 s**. Skärmen räknar ner i helskärm med en mjuk ljuspuls per sekund (blått 10–6, orange 5–2, grönt 1–0). Ljudet är ett trumslag varje sekund, med mässingsstötar på 3-2-1. Vid noll kommer en fanfar och ett stort **GOGO!** i grönt plus den färg du valt under Inställningar. Klockan för starten börjar exakt vid noll. Det finns också **Starta direkt** utan nedräkning. Under *Inställningar* kan du testa nedräkningen och ljudet utan att något startar.
+1. **Tidtagning → Nästa start.** Tryck **Nedräkning 10 s**. Skärmen räknar ner i helskärm med en mjuk ljuspuls per sekund (blått 10–6, orange 5–2, grönt 1–0). Ljudet är ett trumslag varje sekund, med mässingsstötar på 3-2-1, och under sista sekunden ett sug uppåt. Vid noll kommer **BOOM + POW** med cymbal och gnistor, sedan tre **GO!**-slag (klapp, trumma och mässing) och ett slutackord, plus ett stort **GOGO!** i grönt plus den färg du valt under Inställningar. Klockan för starten börjar exakt vid noll. Det finns också **Starta direkt** utan nedräkning. Under *Inställningar* kan du testa nedräkningen och ljudet utan att något startar.
 2. Varje pågående start visas med sin löpande tid och en ruta per startnummer. Flera starter kan pågå samtidigt, och den äldsta ligger överst.
 3. **När ett lag går i mål trycker du på dess ruta.** Sluttiden sparas direkt, och rutan blir grön och visar tiden.
 4. **Tryckte du fel?** Tryck på rutan igen och välj **Ångra målgång**. Om ett lag bryter trycker du på rutan och väljer **Bröt loppet (DNF)**.
