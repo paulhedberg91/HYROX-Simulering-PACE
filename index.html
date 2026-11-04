@@ -125,19 +125,33 @@ textarea{resize:vertical;line-height:1.5;min-height:110px}
 
 /* Nedräkning */
 #cd{position:fixed;inset:0;z-index:100;display:grid;place-items:center;align-content:center;text-align:center;gap:10px;padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));--cdc:var(--accent);background:radial-gradient(60% 60% at 50% 50%, color-mix(in srgb,var(--cdc) 26%,var(--ink)) 0%, var(--ink) 75%);transition:background .3s}
+#cd{overflow:hidden}
 #cd::before{content:"";position:absolute;inset:0;background:var(--cdc);opacity:0;pointer-events:none}
-#cd.flash::before{animation:cdflash .9s ease-out}
-#cd.flash .big{animation:cdpop .9s ease-out}
-@keyframes cdflash{0%{opacity:.55}100%{opacity:0}}
-@keyframes cdpop{0%{transform:scale(1.12)}100%{transform:scale(1)}}
+#cd.flash::before{animation:cdflash .75s ease-out}
+#cd.flash.urgent::before{animation:cdflash2 1s linear}
+#cd.flash .big{animation:cdslam .55s cubic-bezier(.2,1.4,.4,1)}
+#cd.flash.urgent{animation:cdshake .35s linear}
+@keyframes cdflash{0%{opacity:.85}100%{opacity:0}}
+@keyframes cdflash2{0%{opacity:.9}18%{opacity:0}45%{opacity:.65}62%{opacity:0}100%{opacity:0}}
+@keyframes cdslam{0%{transform:scale(1.9);opacity:.2}45%{transform:scale(.93);opacity:1}100%{transform:scale(1)}}
+@keyframes cdshake{0%,100%{transform:none}20%{transform:translate(-1.4vmin,.6vmin)}40%{transform:translate(1.2vmin,-.8vmin)}60%{transform:translate(-.9vmin,-.5vmin)}80%{transform:translate(.7vmin,.7vmin)}}
+#cd .ring{position:absolute;left:50%;top:50%;width:50vmin;height:50vmin;margin:-25vmin 0 0 -25vmin;border-radius:50%;border:1.6vmin solid var(--cdc);box-shadow:0 0 4vmin var(--cdc),inset 0 0 4vmin var(--cdc);pointer-events:none;animation:cdring .9s cubic-bezier(.1,.7,.3,1) forwards}
+@keyframes cdring{0%{transform:scale(.25);opacity:1}100%{transform:scale(3.2);opacity:0}}
 #cd.c-blue{--cdc:#3ba7e6}#cd.c-orange{--cdc:#ff8a1f}#cd.c-green{--cdc:var(--go)}
-#cd>*{position:relative}
+#cd>*:not(.ring){position:relative}
+/* GOGO! */
+#cd.gogo{animation:cdshake .4s linear 3}
+#cd.gogo::before{animation:gostrobe .16s steps(1) 10,gofade 1.4s ease-out 1.6s forwards}
+@keyframes gostrobe{0%{opacity:.95;background:var(--go)}50%{opacity:.9;background:#fff}}
+@keyframes gofade{0%{opacity:.6;background:var(--go)}100%{opacity:.18;background:var(--go)}}
+#cd .big.go{font-size:min(44vh,33vw);letter-spacing:.01em;color:#fff;-webkit-text-stroke:.6vmin #04140b;text-shadow:0 0 3vmin var(--go),0 0 9vmin var(--go),0 0 18vmin var(--go);animation:gozoom .6s cubic-bezier(.2,1.6,.4,1),gopulse .5s ease-in-out .6s infinite alternate}
+@keyframes gozoom{0%{transform:scale(3.5) rotate(-6deg);opacity:0}100%{transform:none;opacity:1}}
+@keyframes gopulse{from{transform:scale(1)}to{transform:scale(1.07)}}
 #cd .lbl{font-weight:700;letter-spacing:.3em;text-transform:uppercase;font-size:clamp(20px,4vw,40px);padding-left:.3em}
-#cd .big{font-family:var(--font-display);font-weight:900;line-height:.85;font-size:min(60vh,55vw);font-variant-numeric:tabular-nums;color:var(--cdc);text-shadow:0 0 6vh color-mix(in srgb,var(--cdc) 70%,transparent)}
-#cd .big.go{font-size:min(40vh,30vw)}
+#cd .big{font-family:var(--font-display);font-weight:900;line-height:.85;font-size:min(60vh,55vw);font-variant-numeric:tabular-nums;color:#fff;-webkit-text-stroke:.5vmin var(--cdc);text-shadow:0 0 2vmin var(--cdc),0 0 8vmin var(--cdc)}
 #cd .sub{font-weight:700;letter-spacing:.12em;text-transform:uppercase;font-size:clamp(16px,2.6vw,28px);color:var(--muted)}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--text);color:var(--ink);padding:12px 20px;border-radius:999px;font-weight:700;z-index:120;max-width:calc(100% - 32px);text-align:center}
-@media (prefers-reduced-motion:reduce){.tile{transition:none}#cd.flash .big{animation:none}}
+@media (prefers-reduced-motion:reduce){.tile{transition:none}#cd.flash .big,#cd.flash.urgent,#cd.gogo,#cd .big.go,#cd .ring{animation:none}#cd.gogo::before{animation:none;opacity:.3}}
 </style>
 </head>
 <body>
@@ -443,13 +457,30 @@ function beginCountdown(id) {
   try { audio = audio || new (window.AudioContext || window.webkitAudioContext)(); audio.resume?.(); } catch (e) {}
   ui.cd = { id, target: Date.now() + (+state.event.countdown || 10) * 1000, last:null, goUntil:null };
   $('#cd-sub').textContent = `${h.title} · ${entriesOf(h).map(e => e.nr).join(', ')}`;
-  $('#cd-ctl').hidden = false; $('#cd').hidden = false; tick();
+  $('#cd-ctl').hidden = false; $('#cd').classList.remove('gogo'); $('#cd').querySelectorAll('.ring').forEach(r => r.remove()); $('#cd').hidden = false; tick();
 }
-function cdColor(c) {   // byt färg och blinka en gång per sekund
+function cdColor(c, urgent) {   // byt färg, blixt + chockvåg varje sekund
   const el = $('#cd');
-  el.classList.remove('c-blue', 'c-orange', 'c-green', 'flash');
+  el.classList.remove('c-blue', 'c-orange', 'c-green', 'flash', 'urgent', 'gogo');
   void el.offsetWidth;   // starta om animationen
   el.classList.add('c-' + c, 'flash');
+  if (urgent) el.classList.add('urgent');
+  ring(0); if (urgent) ring(180);
+}
+function ring(delay) {
+  setTimeout(() => {
+    const r = document.createElement('div'); r.className = 'ring';
+    r.addEventListener('animationend', () => r.remove());
+    $('#cd').appendChild(r);
+  }, delay);
+}
+function gogo() {
+  const el = $('#cd');
+  el.classList.remove('flash', 'urgent', 'c-blue', 'c-orange');
+  void el.offsetWidth;
+  el.classList.add('c-green', 'gogo');
+  [0, 120, 240, 420, 650].forEach(ring);
+  [[880, 0], [880, 160], [1320, 320]].forEach(([f, t]) => setTimeout(() => beep(f, t === 320 ? .8 : .12), t));
 }
 function cdTick() {
   const c = ui.cd; if (!c) return;
@@ -461,13 +492,13 @@ function cdTick() {
     $('#cd-lbl').textContent = 'Startar om';
     if (num.textContent !== String(s)) {
       num.textContent = s; num.className = 'big';
-      cdColor(s > 5 ? 'blue' : s > 1 ? 'orange' : 'green');   // 10–6 blå, 5–2 orange, 1–0 grön
+      cdColor(s > 5 ? 'blue' : s > 1 ? 'orange' : 'green', s <= 3);   // 10–6 blå, 5–2 orange, 1–0 grön
       if (s <= 3 && c.last !== s) { c.last = s; beep(660, .15); }
     }
   } else {
     startHeat(c.id, c.target);           // exakt tidpunkt när nedräkningen nådde 0
-    $('#cd-lbl').textContent = ''; num.textContent = 'KÖR!'; num.className = 'big go'; cdColor('green'); $('#cd-ctl').hidden = true;
-    beep(990, .7); c.goUntil = now + 2000;
+    $('#cd-lbl').textContent = ''; num.textContent = 'GOGO!'; num.className = 'big go'; $('#cd-ctl').hidden = true; $('#cd-sub').textContent = '';
+    gogo(); c.goUntil = now + 3200;
   }
 }
 

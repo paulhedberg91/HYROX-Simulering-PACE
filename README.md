@@ -4,7 +4,7 @@ Tidtagning, heatlistor och nedräkning till starter för PACE HYROX Simulation (
 En webbapp för iPad, i en enda fil (`index.html`). Ingen installation och inga beroenden.
 
 ## Så funkar det på eventdagen
-1. **Tidtagning → Nästa start.** Tryck **Nedräkning 10 s** så räknar skärmen ner i helskärm och piper de sista 3 sekunderna. Klockan för starten startar exakt när den når 0 och skärmen visar **KÖR!** Det finns också **Starta direkt** utan nedräkning.
+1. **Tidtagning → Nästa start.** Tryck **Nedräkning 10 s** så räknar skärmen ner i helskärm (blått 10–6, orange 5–2, grönt 1–0, med blixtar och chockvågor) och piper de sista 3 sekunderna. Klockan för starten startar exakt när den når 0 och skärmen exploderar i ett grönt **GOGO!** Det finns också **Starta direkt** utan nedräkning.
 2. Varje pågående start visas med sin löpande tid och en ruta per startnummer. Flera starter kan pågå samtidigt, och den äldsta ligger överst.
 3. **När ett lag går i mål trycker du på dess ruta.** Sluttiden sparas direkt, och rutan blir grön och visar tiden.
 4. **Tryckte du fel?** Tryck på rutan igen och välj **Ångra målgång**. Om ett lag bryter trycker du på rutan och väljer **Bröt loppet (DNF)**.
