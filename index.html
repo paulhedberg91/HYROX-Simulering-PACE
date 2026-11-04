@@ -157,16 +157,15 @@ textarea{resize:vertical;line-height:1.5;min-height:110px}
 #cd.c-blue{--cdc:#3ba7e6}#cd.c-orange{--cdc:#ff8a1f}#cd.c-green{--cdc:var(--go)}
 #cd>*:not(.ring){position:relative}
 /* GOGO! */
-#cd.gogo{animation:cdshake .4s linear 3}
-#cd.gogo{--yel:#ffd60a;background:radial-gradient(60% 60% at 50% 50%, color-mix(in srgb,var(--yel) 30%,var(--ink)) 0%, color-mix(in srgb,var(--go) 35%,var(--ink)) 75%)}
-#cd.gogo::before{animation:gostrobe .16s steps(1) 10,gofade 1.4s ease-out 1.6s forwards}
-@keyframes gostrobe{0%{opacity:.95;background:var(--go)}50%{opacity:.95;background:var(--yel)}}
-@keyframes gofade{0%{opacity:.6;background:var(--go)}100%{opacity:.2;background:var(--go)}}
-#cd .ring.yel{border-color:var(--yel);box-shadow:0 0 4vmin var(--yel),inset 0 0 4vmin var(--yel)}
-#cd .big.go{font-size:min(44vh,33vw);letter-spacing:.01em;color:var(--yel);-webkit-text-stroke:.6vmin #04140b;text-shadow:0 0 3vmin var(--go),0 0 9vmin var(--go),0 0 18vmin var(--go);animation:gozoom .6s cubic-bezier(.2,1.6,.4,1),gopulse .5s ease-in-out .6s infinite alternate,gotext .3s steps(1) .6s infinite}
-@keyframes gotext{0%{color:var(--yel);text-shadow:0 0 3vmin var(--go),0 0 9vmin var(--go),0 0 18vmin var(--go)}50%{color:var(--go);text-shadow:0 0 3vmin var(--yel),0 0 9vmin var(--yel),0 0 18vmin var(--yel)}}
+/* GOGO! – lugnare: kort strobe, en skakning, tre ringar. Färg 2 (--g2) väljs under Inställningar */
+#cd.gogo{--g2:#3ba7e6;animation:cdshake .4s linear 1;background:radial-gradient(60% 60% at 50% 50%, color-mix(in srgb,var(--go) 45%,var(--ink)) 0%, color-mix(in srgb,var(--go) 18%,var(--ink)) 85%)}
+#cd.gogo::before{animation:gostrobe .3s steps(1) 3,gofade 1.6s ease-out .9s forwards}
+@keyframes gostrobe{0%{opacity:.75;background:var(--go)}50%{opacity:.6;background:var(--g2)}}
+@keyframes gofade{0%{opacity:.45;background:var(--go)}100%{opacity:.15;background:var(--go)}}
+#cd .ring.g2{border-color:var(--g2);box-shadow:0 0 4vmin var(--g2),inset 0 0 4vmin var(--g2)}
+#cd .big.go{font-size:min(44vh,33vw);letter-spacing:.01em;color:var(--gt,#fff);-webkit-text-stroke:.5vmin #04140b;text-shadow:0 0 3vmin var(--g2),0 0 10vmin var(--go);animation:gozoom .6s cubic-bezier(.2,1.4,.4,1),gopulse .8s ease-in-out .6s infinite alternate}
 @keyframes gozoom{0%{transform:scale(3.5) rotate(-6deg);opacity:0}100%{transform:none;opacity:1}}
-@keyframes gopulse{from{transform:scale(1)}to{transform:scale(1.07)}}
+@keyframes gopulse{from{transform:scale(1)}to{transform:scale(1.04)}}
 #cd .lbl{font-weight:700;letter-spacing:.3em;text-transform:uppercase;font-size:clamp(20px,4vw,40px);padding-left:.3em}
 #cd .big{font-family:var(--font-display);font-weight:900;line-height:.85;font-size:min(60vh,55vw);font-variant-numeric:tabular-nums;color:#fff;-webkit-text-stroke:.5vmin var(--cdc);text-shadow:0 0 2vmin var(--cdc),0 0 8vmin var(--cdc)}
 #cd .sub{font-weight:700;letter-spacing:.12em;text-transform:uppercase;font-size:clamp(16px,2.6vw,28px);color:var(--muted)}
@@ -230,7 +229,7 @@ const SEED = [
 ];
 const seed = () => ({
   v: 1,
-  event: { name:'HYROX Simulation', date:'2026-11-07', interval:30, countdown:10, sound:true },
+  event: { name:'HYROX Simulation', date:'2026-11-07', interval:30, countdown:10, sound:true, goColor:'blue' },
   heats: SEED.map(([time, rows], i) => ({ id:uid(), title:`Start ${i+1}`, time, lanes:rows.join('\n'), startedAt:null })),
   res: {},   // nyckel: startnummer -> { fin: tidsstämpel ms, dnf: bool }
 });
@@ -425,6 +424,12 @@ const V = {
         <label class="f">Nedräkning (sekunder)<input id="f-cd" type="number" inputmode="numeric" min="3" max="120" data-path="event.countdown" value="${esc(ev.countdown)}"></label>
       </div>
       <label class="chk"><input id="f-sound" type="checkbox" data-path="event.sound"${ev.sound ? ' checked' : ''}> Pip de sista 3 sekunderna och vid start</label>
+      <div class="grid">
+        <label class="f">Färg ihop med grönt på GOGO!<select id="f-gocolor" data-path="event.goColor" style="width:100%;background:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-height:46px;font-size:16px;color:var(--text)">
+          ${Object.entries(GOCOL).map(([k, v]) => `<option value="${k}"${ev.goColor === k ? ' selected' : ''}>${v.label}</option>`).join('')}
+        </select></label>
+        <button class="btn" type="button" data-act="go-test">Testa GOGO!</button>
+      </div>
     </section>
     <section class="sec"><div class="sec-h"><div><h2>Backup</h2><p>Allt sparas automatiskt på den här iPaden. Exportera en backup under dagen så att inga tider försvinner.</p></div></div>
       <div class="row">
@@ -512,18 +517,27 @@ function ring(delay, cls) {
     $('#cd').appendChild(r);
   }, delay);
 }
+const GOCOL = {
+  blue:  { label:'PACE-blå (rekommenderad)', g2:'#3ba7e6', text:'#ffffff' },
+  white: { label:'Vit – ren och sportig',     g2:'#ffffff', text:'#ffffff' },
+  lime:  { label:'Lime – ton i ton',          g2:'#c8f560', text:'#ffffff' },
+  navy:  { label:'Mörkblå – stark kontrast',  g2:'#0b2a4a', text:'#ffffff' },
+  yellow:{ label:'Gul',                       g2:'#ffd60a', text:'#ffd60a' },
+};
 function gogo() {
   const el = $('#cd');
   el.classList.remove('flash', 'urgent', 'c-blue', 'c-orange');
   void el.offsetWidth;
+  const gc = GOCOL[state.event.goColor] || GOCOL.blue;
+  el.style.setProperty('--g2', gc.g2); el.style.setProperty('--gt', gc.text);
   el.classList.add('c-green', 'gogo');
-  [0, 120, 240, 420, 650].forEach((t, i) => ring(t, i % 2 ? 'yel' : ''));
+  [0, 220, 440].forEach((t, i) => ring(t, i === 1 ? 'g2' : ''));
   [[880, 0], [880, 160], [1320, 320]].forEach(([f, t]) => setTimeout(() => beep(f, t === 320 ? .8 : .12), t));
 }
 function cdTick() {
   const c = ui.cd; if (!c) return;
   const now = Date.now(), num = $('#cd-num');
-  if (c.goUntil) { if (now > c.goUntil) { ui.cd = null; $('#cd').hidden = true; render(); } return; }
+  if (c.goUntil) { if (now > c.goUntil) { ui.cd = null; $('#cd').hidden = true; if (!c.preview) render(); } return; }
   const ms = c.target - now;
   if (ms > 0) {
     const s = Math.ceil(ms / 1000);
@@ -637,6 +651,13 @@ document.addEventListener('click', e => {
     ui.tab = 'lista'; ui.upSel = null; render();
     const el = document.getElementById('heat-' + b.dataset.id);
     if (el) { el.scrollIntoView({ block:'center' }); el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 2500); }
+  }
+  else if (a === 'go-test') {   // visa GOGO! utan att starta något
+    try { audio = audio || new (window.AudioContext || window.webkitAudioContext)(); audio.resume?.(); } catch (x) {}
+    $('#cd-lbl').textContent = ''; $('#cd-sub').textContent = 'Test – ingen start'; $('#cd-ctl').hidden = true;
+    const n = $('#cd-num'); n.textContent = 'GOGO!'; n.className = 'big'; void n.offsetWidth; n.className = 'big go';
+    $('#cd').querySelectorAll('.ring').forEach(r => r.remove()); $('#cd').hidden = false;
+    gogo(); ui.cd = { preview:true, goUntil: Date.now() + 3200 };
   }
   else if (a === 'cd-start') beginCountdown(b.dataset.id);
   else if (a === 'cd-cancel') { ui.cd = null; $('#cd').hidden = true; render(); }
