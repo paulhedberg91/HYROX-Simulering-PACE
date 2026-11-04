@@ -9,7 +9,8 @@ En webbapp för iPad, i en enda fil (`index.html`). Ingen installation och inga 
 3. **När ett lag går i mål trycker du på dess ruta.** Sluttiden sparas direkt, och rutan blir grön och visar tiden.
 4. **Tryckte du fel?** Tryck på rutan igen och välj **Ångra målgång**. Om ett lag bryter trycker du på rutan och väljer **Bröt loppet (DNF)**.
 5. **Resultat** visar alla tider, med placering inom varje klass och filter per klass. Med ✎ kan du rätta en tid för hand (`h:mm:ss` eller `DNF`).
-6. **Felstart?** Med **Felstart – nollställ start** nollställs starten och alla tider i den.
+6. **Kommande starter** visas som kort med tid, tid kvar och alla startande. Tryck på ett kort för att starta det (nedräkning eller direkt), flytta fram det en plats (planerade tider byter plats) eller hoppa till redigering.
+7. **Felstart?** Med **Felstart – nollställ start** nollställs starten och alla tider i den.
 
 ## Startlista
 - 13 starter, 52 startnummer, en start var 30:e minut från 08:30 till 14:30. Aktiv tid totalt 08:30–15:00, 6 h 30 min.
