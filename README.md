@@ -14,8 +14,9 @@ En webbapp för iPad, i en enda fil (`index.html`). Ingen installation och inga 
 
 ## Startlista
 - 13 starter, 52 startnummer, en start var 30:e minut från 08:30 till 14:30. Aktiv tid totalt 08:30–15:00, 6 h 30 min.
-- Under **Startlista** kan du ändra namn, fylla i partners (`XXX` visas som *Partner TBA*), flytta deltagare mellan starter och lägga om de planerade tiderna med jämna mellanrum.
-- Format: en rad per startnummer, `Nr | Klass | Deltagare 1 | Deltagare 2`.
+- Under **Startlista** har varje startande en egen rad med fälten Nr, Klass, Deltagare 1 och Deltagare 2. Skriv om namn direkt i fälten, så sparas de automatiskt. `XXX` visas som *Partner TBA*.
+- **Flytta till…** flyttar en startande till en annan start. Med **+ Lägg till startande** lägger du till fler, och med ✕ tar du bort (efter en bekräftelse). Den som redan har en sluttid kan inte flyttas innan målgången har ångrats.
+- Ändrar du ett startnummer följer en eventuell tid med.
 - **Faktisk start** fylls i automatiskt. Om ni glömde trycka på start kan du skriva in rätt klockslag där i efterhand, så räknas alla tider om.
 
 ## Viktigt

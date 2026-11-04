@@ -136,6 +136,14 @@ textarea{resize:vertical;line-height:1.5;min-height:110px}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:12px;align-items:end}
 .hrow{display:grid;grid-template-columns:110px minmax(0,1fr) 150px auto;gap:10px;align-items:end;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--panel-2)}
 .hrow .full{grid-column:1/-1}
+.ents{grid-column:1/-1;display:grid;gap:8px}
+.ents .eh,.ent{display:grid;grid-template-columns:72px 170px minmax(0,1fr) minmax(0,1fr) 170px 44px;gap:8px;align-items:center}
+.ents .eh{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:0 2px}
+.ent input,.ent select{min-height:44px;padding:8px 10px;font-size:16px;width:100%;background:var(--ink);border:1px solid var(--line);border-radius:10px;color:var(--text)}
+.ent .nr{font-family:var(--font-num);font-weight:700;font-size:20px;color:var(--accent);text-align:center}
+.ent.has-res input{border-style:dashed}
+.ent select{color:var(--muted)}
+@media (max-width:900px){.ents .eh{display:none}.ent{grid-template-columns:64px minmax(0,1fr) 44px;padding:10px;border:1px solid var(--line);border-radius:12px}.ent>:nth-child(2){grid-column:2/4}.ent>:nth-child(3),.ent>:nth-child(4),.ent>:nth-child(5){grid-column:1/-1}.ent>:nth-child(6){grid-column:3;grid-row:1}.ent>:nth-child(2){grid-column:2}}
 @media (max-width:700px){.hrow{grid-template-columns:1fr 1fr}.hrow>:nth-child(2){grid-column:1/-1;order:-1}}
 .chk{display:flex;align-items:center;gap:10px;font-weight:600;min-height:44px;cursor:pointer}
 .chk input{width:22px;height:22px;accent-color:var(--accent)}
@@ -397,13 +405,14 @@ const V = {
         <label class="f">Faktisk start<input id="f-h${i}-start" type="time" step="1" data-start="${i}" value="${h.startedAt ? fmtClock(h.startedAt, true) : ''}"></label>
         <div class="row" style="padding-bottom:4px">${st === 'wait' ? `<button class="btn sm go" type="button" data-act="start-now" data-id="${h.id}">Starta</button>` : `<span class="pill ${st === 'run' ? 'run' : 'done'}">${st === 'run' ? 'Pågår' : 'Klar'}</span><button class="btn sm ghost" type="button" data-act="ask-reset" data-id="${h.id}">↺ Starta om</button>`}
           <button class="btn sm danger" type="button" data-act="del-heat" data-i="${i}" aria-label="Ta bort start">✕</button></div>
-        <label class="f full">Startande · Nr | Klass | Deltagare 1 | Deltagare 2 (en per rad)<textarea id="f-h${i}-lanes" rows="4" data-path="heats.${i}.lanes">${esc(h.lanes)}</textarea></label>
+        ${entEditor(h, i)}
       </div>`;
     }).join('');
     const total = state.heats.reduce((n, h) => n + entriesOf(h).length, 0);
     const sp = plannedSpan();
-    return `<section class="sec">
-      <div class="sec-h"><div><h2>Startlista</h2><p>Ändringar sparas direkt. <b>Faktisk start</b> fylls i automatiskt när du startar. Rätta den här om någon start glömdes bort.</p></div></div>
+    const classes = [...new Set(state.heats.flatMap(h => entriesOf(h).map(e => e.cls)).filter(Boolean))];
+    return `<datalist id="dl-cls">${classes.map(c => `<option value="${esc(c)}">`).join('')}</datalist><section class="sec">
+      <div class="sec-h"><div><h2>Startlista</h2><p>Ändringar sparas direkt. Skriv om namn direkt i fälten. Med <b>Flytta till</b> byter en startande heat. Skriv <b>XXX</b> som partner om den inte är klar. <b>Faktisk start</b> fylls i automatiskt när du startar.</p></div></div>
       <div class="grid">
         <label class="f">Första start<input id="f-first" type="time" value="${esc(state.heats[0]?.time || '08:30')}"></label>
         <label class="f">Minuter mellan starter<input id="f-int" type="number" inputmode="numeric" min="1" data-path="event.interval" value="${esc(ev.interval)}"></label>
@@ -460,6 +469,29 @@ function upcoming(h, k) {
       </div>` : '<div class="tapme">Tryck för val</div>'}
   </div>`;
 }
+
+const serialize = es => es.map(e => [e.nr, e.cls, ...e.people].join(' | ')).join('\n');
+function entEditor(h, i) {
+  const es = entriesOf(h);
+  const opts = state.heats.filter(x => x.id !== h.id).map(x => `<option value="${x.id}">${esc(x.time)} · ${esc(x.title)}${x.startedAt ? ' (har startat)' : ''}</option>`).join('');
+  return `<div class="ents">
+    <div class="eh"><span>Nr</span><span>Klass</span><span>Deltagare 1</span><span>Deltagare 2</span><span>Flytta</span><span></span></div>
+    ${es.map((e, k) => {
+      const has = state.res[e.nr]?.fin || state.res[e.nr]?.dnf;
+      const f = (n, v, ph, extra = '') => `<input id="f-e-${h.id}-${k}-${n}" type="text" data-ent="${i}:${k}:${n}" value="${esc(v)}" placeholder="${ph}"${extra}>`;
+      return `<div class="ent ${has ? 'has-res' : ''}">
+        ${f('nr', e.nr, 'Nr', ' inputmode="numeric" class="nr"')}
+        ${f('cls', e.cls, 'Klass', ' list="dl-cls"')}
+        ${f('p1', e.people[0] || '', 'Deltagare 1')}
+        ${f('p2', e.people[1] || '', 'Deltagare 2 (tom = single)')}
+        <select id="f-e-${h.id}-${k}-mv" data-move="${i}:${k}" aria-label="Flytta nr ${esc(e.nr)} till annan start"><option value="">Flytta till…</option>${opts}</select>
+        <button class="btn sm danger" type="button" data-act="ask-del-ent" data-ent="${i}:${k}" aria-label="Ta bort nr ${esc(e.nr)}">✕</button>
+      </div>`;
+    }).join('') || '<div class="empty">Inga startande i den här starten.</div>'}
+    <div><button class="btn sm" type="button" data-act="add-ent" data-i="${i}">+ Lägg till startande</button></div>
+  </div>`;
+}
+const allNrs = () => state.heats.flatMap(h => entriesOf(h).map(e => e.nr));
 
 function tile(h, e) {
   const r = state.res[e.nr] || {};
@@ -573,6 +605,15 @@ setInterval(tick, 200);
 function setPath(p, v) { const k = p.split('.'); let o = state; for (let i = 0; i < k.length - 1; i++) o = o[k[i]]; o[k[k.length - 1]] = v; }
 document.addEventListener('input', e => {
   const el = e.target;
+  if (el.dataset.ent && el.tagName === 'INPUT') {
+    const [i, k, f] = el.dataset.ent.split(':'), h = state.heats[+i], es = entriesOf(h), en = es[+k];
+    if (!en) return;
+    if (f === 'nr') return;   // startnummer sparas när fältet lämnas (flyttar ev. tid)
+    if (f === 'cls') en.cls = el.value.replace(/\|/g, '');
+    else { const ix = f === 'p1' ? 0 : 1; en.people[ix] = el.value.replace(/\|/g, ''); en.people = [en.people[0] || '', en.people[1] || ''].filter((x, j) => j === 0 || x); }
+    h.lanes = serialize(es); save();
+    return;
+  }
   if (el.dataset.path) {
     let v = el.type === 'checkbox' ? el.checked : el.value;
     if (el.type === 'number') v = el.value === '' ? '' : Number(el.value);
@@ -582,6 +623,25 @@ document.addEventListener('input', e => {
 });
 document.addEventListener('change', e => {
   const el = e.target;
+  if (el.dataset.ent && el.dataset.ent.endsWith(':nr')) {
+    const [i, k] = el.dataset.ent.split(':'), h = state.heats[+i], es = entriesOf(h), en = es[+k];
+    const nv = el.value.trim().replace(/\|/g, ''), old = en.nr;
+    if (!nv || nv === old) { el.value = old; return; }
+    if (allNrs().includes(nv)) { toast(`Nr ${nv} finns redan`); el.value = old; return; }
+    if (state.res[old]) { state.res[nv] = state.res[old]; delete state.res[old]; }
+    en.nr = nv; h.lanes = serialize(es); save(); render(); toast(`Nr ${old} ändrat till ${nv}`); return;
+  }
+  if (el.dataset.move) {
+    const [i, k] = el.dataset.move.split(':'), from = state.heats[+i], to = state.heats.find(x => x.id === el.value);
+    if (!to) return;
+    const es = entriesOf(from), en = es[+k];
+    if (state.res[en.nr]?.fin || state.res[en.nr]?.dnf) { toast(`Nr ${en.nr} har redan en tid. Ångra målgången först.`); el.value = ''; return; }
+    es.splice(+k, 1); from.lanes = serialize(es);
+    const tes = entriesOf(to); tes.push(en); to.lanes = serialize(tes);
+    save(); render(); toast(`Nr ${en.nr} flyttad till ${to.title} (${to.time})${to.startedAt ? '. Obs! den starten har redan gått.' : ''}`);
+    document.getElementById('heat-' + to.id)?.classList.add('flash'); setTimeout(() => document.getElementById('heat-' + to.id)?.classList.remove('flash'), 2000);
+    return;
+  }
   if (el.dataset.start != null) {
     const h = state.heats[+el.dataset.start];
     if (!el.value) { if (h.startedAt) { toast('Använd Felstart för att nollställa en start'); el.value = fmtClock(h.startedAt, true); } return; }
@@ -590,7 +650,7 @@ document.addEventListener('change', e => {
     base.setHours(H, M, S || 0, 0);
     h.startedAt = base.getTime(); save(); toast(`Starttid för ${h.title}: ${fmtClock(h.startedAt, true)}`); render();
   }
-  if (el.dataset.path === 'event.date' || el.dataset.path === 'event.interval' || (el.dataset.path || '').endsWith('.lanes') || (el.dataset.path || '').endsWith('.time')) render();
+  if (el.dataset.path === 'event.date' || el.dataset.path === 'event.interval' || (el.dataset.path || '').endsWith('.time')) render();
   if (el.id === 'f-import' && el.files[0]) {
     const fr = new FileReader();
     fr.onload = () => { try { const d = JSON.parse(fr.result); if (!d.heats) throw 0; state = d; load2(); save(); render(); toast('Backup inläst'); } catch (x) { toast('Filen gick inte att läsa. Välj en backup från den här appen.'); } };
@@ -658,6 +718,20 @@ document.addEventListener('click', e => {
     const n = $('#cd-num'); n.textContent = 'GOGO!'; n.className = 'big'; void n.offsetWidth; n.className = 'big go';
     $('#cd').querySelectorAll('.ring').forEach(r => r.remove()); $('#cd').hidden = false;
     gogo(); ui.cd = { preview:true, goUntil: Date.now() + 3200 };
+  }
+  else if (a === 'add-ent') {
+    const h = state.heats[+b.dataset.i], es = entriesOf(h);
+    const nums = allNrs().map(Number).filter(n => !isNaN(n)), nr = String((nums.length ? Math.max(...nums) : 0) + 1);
+    es.push({ nr, cls: es[es.length - 1]?.cls || '', people:[''] }); h.lanes = serialize(es); save(); render();
+    document.getElementById(`f-e-${h.id}-${es.length - 1}-p1`)?.focus();
+  }
+  else if (a === 'ask-del-ent') {
+    const [i, k] = b.dataset.ent.split(':'), en = entriesOf(state.heats[+i])[+k];
+    b.outerHTML = `<span class="row" style="grid-column:1/-1"><span>Ta bort nr ${esc(en.nr)}?</span><button class="btn danger sm" type="button" data-act="del-ent" data-ent="${b.dataset.ent}">Ja, ta bort</button><button class="btn sm" type="button" data-act="rerender">Avbryt</button></span>`;
+  }
+  else if (a === 'del-ent') {
+    const [i, k] = b.dataset.ent.split(':'), h = state.heats[+i], es = entriesOf(h), en = es.splice(+k, 1)[0];
+    delete state.res[en.nr]; h.lanes = serialize(es); save(); render(); toast(`Nr ${en.nr} borttagen`);
   }
   else if (a === 'cd-start') beginCountdown(b.dataset.id);
   else if (a === 'cd-cancel') { ui.cd = null; $('#cd').hidden = true; render(); }
