@@ -340,7 +340,7 @@ const V = {
           <div class="elapsed js-el" data-from="${h.startedAt}">0:00</div>
         </div>
         <div class="tiles">${es.map(e => tile(h, e)).join('')}</div>
-        <div class="row" style="justify-content:flex-end"><button class="btn danger sm" type="button" data-act="ask-reset" data-id="${h.id}">Felstart – nollställ start</button></div>
+        <div class="row" style="justify-content:flex-end"><button class="btn danger sm" type="button" data-act="ask-reset" data-id="${h.id}">↺ Starta om ${esc(h.title)} (felstart/test)</button></div>
       </section>`;
     }
     if (waiting.length > 1) {
@@ -350,7 +350,11 @@ const V = {
     }
     if (done.length) {
       html += `<section class="sec"><div class="sec-h"><div><h2>Klara starter</h2></div></div>
-        <div class="row">${done.map(h => `<span class="pill done">${esc(h.title)} ✓</span>`).join('')}</div></section>`;
+        <div class="row">${done.map(h => `<span class="pill done">${esc(h.title)} ✓</span><button class="btn sm ghost" type="button" data-act="ask-reset" data-id="${h.id}">↺ Starta om</button>`).join('')}</div></section>`;
+    }
+    if (state.heats.some(h => h.startedAt)) {
+      html += `<section class="sec"><div class="sec-h"><div><h2>Starta om</h2><p>Har ni testat? Nollställ alla starter och tider så att allt är som innan Start 1. Startlistan och namnen ligger kvar.</p></div>
+        <button class="btn danger" type="button" data-act="ask-reset-all">↺ Starta om allt</button></div></section>`;
     }
     return html;
   },
@@ -389,7 +393,7 @@ const V = {
         <label class="f">Planerad tid<input id="f-h${i}-time" type="time" data-path="heats.${i}.time" value="${esc(h.time)}"></label>
         <label class="f">Namn<input id="f-h${i}-title" type="text" data-path="heats.${i}.title" value="${esc(h.title)}"></label>
         <label class="f">Faktisk start<input id="f-h${i}-start" type="time" step="1" data-start="${i}" value="${h.startedAt ? fmtClock(h.startedAt, true) : ''}"></label>
-        <div class="row" style="padding-bottom:4px">${st === 'wait' ? `<button class="btn sm go" type="button" data-act="start-now" data-id="${h.id}">Starta</button>` : `<span class="pill ${st === 'run' ? 'run' : 'done'}">${st === 'run' ? 'Pågår' : 'Klar'}</span>`}
+        <div class="row" style="padding-bottom:4px">${st === 'wait' ? `<button class="btn sm go" type="button" data-act="start-now" data-id="${h.id}">Starta</button>` : `<span class="pill ${st === 'run' ? 'run' : 'done'}">${st === 'run' ? 'Pågår' : 'Klar'}</span><button class="btn sm ghost" type="button" data-act="ask-reset" data-id="${h.id}">↺ Starta om</button>`}
           <button class="btn sm danger" type="button" data-act="del-heat" data-i="${i}" aria-label="Ta bort start">✕</button></div>
         <label class="f full">Startande · Nr | Klass | Deltagare 1 | Deltagare 2 (en per rad)<textarea id="f-h${i}-lanes" rows="4" data-path="heats.${i}.lanes">${esc(h.lanes)}</textarea></label>
       </div>`;
@@ -428,7 +432,7 @@ const V = {
     </section>
     <section class="sec"><div class="sec-h"><div><h2>Nollställ</h2><p>Används för att testa innan eventet. Startlistan finns kvar.</p></div></div>
       <div class="row" id="reset-box">
-        <button class="btn danger" type="button" data-act="ask-clear-times">Rensa alla tider</button>
+        <button class="btn danger" type="button" data-act="ask-clear-times">↺ Starta om allt</button>
         <button class="btn ghost" type="button" data-act="ask-seed">Återställ originalstartlistan</button>
       </div>
     </section>`;
@@ -635,12 +639,17 @@ document.addEventListener('click', e => {
   else if (a === 'cd-cancel') { ui.cd = null; $('#cd').hidden = true; render(); }
   else if (a === 'start-now') startHeat(b.dataset.id);
   else if (a === 'ask-reset') {
-    b.outerHTML = `<span class="row"><span>Nollställ starten och alla tider i den?</span><button class="btn danger sm" type="button" data-act="reset" data-id="${b.dataset.id}">Ja, nollställ</button><button class="btn sm" type="button" data-act="tab" data-tab="tid">Avbryt</button></span>`;
+    const h = state.heats.find(x => x.id === b.dataset.id);
+    b.outerHTML = `<span class="row"><span>Starta om ${esc(h.title)}? Starttiden och alla tider i den raderas.</span><button class="btn danger sm" type="button" data-act="reset" data-id="${h.id}">Ja, starta om</button><button class="btn sm" type="button" data-act="rerender">Avbryt</button></span>`;
   }
+  else if (a === 'ask-reset-all') {
+    b.outerHTML = `<span class="row"><span>Starta om allt? Alla starter och tider raderas.</span><button class="btn danger" type="button" data-act="clear-times">Ja, starta om allt</button><button class="btn" type="button" data-act="rerender">Avbryt</button></span>`;
+  }
+  else if (a === 'rerender') render();
   else if (a === 'reset') {
     const h = state.heats.find(x => x.id === b.dataset.id);
     h.startedAt = null; for (const en of entriesOf(h)) delete state.res[en.nr];
-    save(); render(); toast(`${h.title} nollställd`);
+    ui.pending = null; save(); render(); toast(`${h.title} är nollställd och redo att startas igen`);
   }
   else if (a === 'cls') { ui.cls = b.dataset.cls; render(); }
   else if (a === 'edit') { ui.editing = b.dataset.nr; render(); const i = $('#f-edit'); i?.focus(); i?.select(); }
@@ -668,10 +677,10 @@ document.addEventListener('click', e => {
   }
   else if (a === 'backup') download(`hyrox-backup-${fmtClock(Date.now()).replace(':', '')}.json`, JSON.stringify(state, null, 2), 'application/json');
   else if (a === 'ask-clear-times' || a === 'ask-seed') {
-    const q = a === 'ask-seed' ? 'Ersätt startlistan med originalet och rensa alla tider?' : 'Rensa alla starter och tider?';
+    const q = a === 'ask-seed' ? 'Ersätt startlistan med originalet och rensa alla tider?' : 'Starta om allt? Alla starter och tider raderas, startlistan ligger kvar.';
     $('#reset-box').innerHTML = `<span>${q} Det går inte att ångra.</span><button class="btn danger" type="button" data-act="${a.slice(4)}">Ja</button><button class="btn ghost" type="button" data-act="tab" data-tab="inst">Avbryt</button>`;
   }
-  else if (a === 'clear-times') { state.heats.forEach(h => h.startedAt = null); state.res = {}; save(); render(); toast('Alla tider rensade'); }
+  else if (a === 'clear-times') { state.heats.forEach(h => h.startedAt = null); state.res = {}; ui.pending = null; ui.upSel = null; ui.tab = 'tid'; save(); render(); scrollTo(0, 0); toast('Allt är nollställt. Start 1 är redo.'); }
   else if (a === 'seed') { const ev = state.event; state = seed(); state.event = ev; save(); render(); toast('Originalstartlistan återställd'); }
 });
 

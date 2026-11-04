@@ -10,7 +10,7 @@ En webbapp för iPad, i en enda fil (`index.html`). Ingen installation och inga 
 4. **Tryckte du fel?** Tryck på rutan igen och välj **Ångra målgång**. Om ett lag bryter trycker du på rutan och väljer **Bröt loppet (DNF)**.
 5. **Resultat** visar alla tider, med placering inom varje klass och filter per klass. Med ✎ kan du rätta en tid för hand (`h:mm:ss` eller `DNF`).
 6. **Kommande starter** visas som kort med tid, tid kvar och alla startande. Tryck på ett kort för att starta det (nedräkning eller direkt), flytta fram det en plats (planerade tider byter plats) eller hoppa till redigering.
-7. **Felstart?** Med **Felstart – nollställ start** nollställs starten och alla tider i den.
+7. **Starta om (felstart eller test):** varje start har knappen **↺ Starta om**, både när den pågår, när den är klar och under Startlista. Längst ner under Tidtagning, och under Inställningar, finns **↺ Starta om allt**. Den nollställer alla starter och tider men behåller startlistan.
 
 ## Startlista
 - 13 starter, 52 startnummer, en start var 30:e minut från 08:30 till 14:30. Aktiv tid totalt 08:30–15:00, 6 h 30 min.
@@ -21,7 +21,7 @@ En webbapp för iPad, i en enda fil (`index.html`). Ingen installation och inga 
 ## Viktigt
 - Allt sparas automatiskt på iPaden (`localStorage`). **Använd inte privat surfning.**
 - Ta en **backup** under *Inställningar* ett par gånger under dagen. *Exportera resultat (CSV)* går att öppna i Excel eller Numbers.
-- Testa gärna i förväg och tryck sedan *Inställningar → Rensa alla tider* före eventet.
+- Testa gärna i förväg och tryck sedan **↺ Starta om allt** före eventet.
 
 ## Öppna på iPaden
 1. Lägg upp appen via **GitHub Pages**: *Settings → Pages → Deploy from branch*, välj grenen och `/ (root)`.
