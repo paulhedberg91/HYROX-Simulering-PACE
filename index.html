@@ -79,6 +79,20 @@ main.wrap{padding-block:20px 90px;display:grid;gap:20px}
 .next .who span{font-size:14px;padding:4px 10px;border-radius:8px;background:var(--panel-2);border:1px solid var(--line)}
 .next .who b{color:var(--accent);font-family:var(--font-num);margin-right:4px}
 .next .acts{display:grid;gap:10px}
+.due{display:grid;gap:8px;margin-top:12px}
+.due .big{font-family:var(--font-num);font-weight:700;font-size:72px;line-height:.85;color:var(--accent);font-variant-numeric:tabular-nums}
+.due .big.late{color:var(--warn)}
+.due .lbl{font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.pbar{height:10px;border-radius:999px;background:var(--line);overflow:hidden}
+.pbar i{display:block;height:100%;width:0;border-radius:inherit;background:var(--accent);transition:width .25s linear}
+.pbar.sm{height:6px}
+.autobar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 16px;border-radius:14px;border:1px solid var(--line);background:var(--panel)}
+.autobar .dot{width:10px;height:10px;border-radius:50%;background:var(--go);display:inline-block;margin-right:8px;box-shadow:0 0 8px var(--go)}
+.autobar.paused .dot{background:var(--warn);box-shadow:none}
+.uc .due-row{display:grid;gap:6px}
+.uc .due-row .t{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.uc .due-row .t b{font-family:var(--font-num);font-size:26px;letter-spacing:0;color:var(--accent);font-variant-numeric:tabular-nums}
+.uc .due-row .t b.late{color:var(--warn)}
 @media (max-width:760px){.next{grid-template-columns:1fr}}
 
 /* Kommande */
@@ -239,7 +253,7 @@ const SEED = [
 ];
 const seed = () => ({
   v: 1,
-  event: { name:'HYROX Simulation', date:'2026-11-07', interval:30, countdown:10, sound:true, goColor:'blue' },
+  event: { name:'HYROX Simulation', date:'2026-11-07', interval:30, countdown:10, sound:true, goColor:'blue', auto:true, autoPaused:false },
   heats: SEED.map(([time, rows], i) => ({ id:uid(), title:`Start ${i+1}`, time, lanes:rows.join('\n'), startedAt:null })),
   res: {},   // nyckel: startnummer -> { fin: tidsstämpel ms, dnf: bool }
 });
@@ -280,6 +294,18 @@ function heatStatus(h) {
   if (!h.startedAt) return 'wait';
   const es = entriesOf(h);
   return es.length && es.every(e => state.res[e.nr]?.fin || state.res[e.nr]?.dnf) ? 'done' : 'run';
+}
+// Automatiska starter: varje start rullar igång X min efter att föregående start gick (kedja)
+function dueMap() {
+  const m = new Map(); if (!state.event.auto) return m;
+  const iv = (+state.event.interval || 30) * 60000;
+  let last = null;
+  for (const h of state.heats) {
+    if (h.startedAt) { last = h.startedAt; continue; }
+    if (last == null) continue;
+    const due = last + iv; m.set(h.id, { due, from: last }); last = due;
+  }
+  return m;
 }
 const plannedSpan = () => {
   const ms = state.heats.map(h => toMin(h.time)).filter(x => x != null);
@@ -412,14 +438,22 @@ const V = {
     const waiting = state.heats.filter(h => !h.startedAt);
     const running = state.heats.filter(h => heatStatus(h) === 'run').sort((a, b) => a.startedAt - b.startedAt);
     const done = state.heats.filter(h => heatStatus(h) === 'done');
-    const nx = waiting[0];
+    const nx = waiting[0], dm = dueMap();
     let html = '';
+    if (state.event.auto && state.heats.some(h => h.startedAt) && waiting.length) {
+      const p = state.event.autoPaused;
+      html += `<div class="autobar ${p ? 'paused' : ''}"><div><span class="dot"></span><b>Automatiska starter ${p ? 'pausade' : 'PÅ'}</b> <span class="muted">· nästa start rullar igång ${+state.event.interval || 30} min efter föregående, med nedräkning ${+state.event.countdown || 10} s</span></div>
+        <button class="btn sm" type="button" data-act="auto-pause">${p ? '▶ Fortsätt automatik' : '❚❚ Pausa automatik'}</button></div>`;
+    }
     if (nx) {
       const es = entriesOf(nx);
       html += `<section class="sec"><div class="next">
         <div style="min-width:0">
-          <div class="eyebrow">Nästa start · planerad</div>
-          <div class="row" style="align-items:baseline;gap:16px;margin-top:6px"><div class="tm">${esc(nx.time)}</div><h3>${esc(nx.title)}</h3><span class="muted js-until" data-min="${toMin(nx.time) ?? ''}"></span></div>
+          ${dm.get(nx.id) ? `<div class="eyebrow">Nästa start · ${state.event.autoPaused ? 'automatik pausad' : `startar automatiskt kl ${fmtClock(dm.get(nx.id).due, true)}`}</div>
+          <div class="row" style="align-items:baseline;gap:16px;margin-top:6px"><h3>${esc(nx.title)}</h3><span class="muted">planerad ${esc(nx.time)}</span></div>
+          <div class="due"><div class="big js-due" data-due="${dm.get(nx.id).due}">–</div><div class="pbar"><i class="js-pbar" data-due="${dm.get(nx.id).due}" data-from="${dm.get(nx.id).from}"></i></div></div>`
+          : `<div class="eyebrow">Nästa start · planerad</div>
+          <div class="row" style="align-items:baseline;gap:16px;margin-top:6px"><div class="tm">${esc(nx.time)}</div><h3>${esc(nx.title)}</h3><span class="muted js-until" data-min="${toMin(nx.time) ?? ''}"></span></div>`}
           <div class="who">${es.map(e => `<span><b>${esc(e.nr)}</b>${esc(names(e))}</span>`).join('')}</div>
         </div>
         <div class="acts">
@@ -444,7 +478,7 @@ const V = {
     if (waiting.length > 1) {
       const rest = waiting.slice(1), people = rest.reduce((n, h) => n + entriesOf(h).length, 0);
       html += `<section class="sec" id="kommande"><div class="sec-h"><div><h2>Kommande starter</h2><p>${rest.length} starter · ${people} startnummer kvar. Tryck på en start för att starta den, flytta fram den eller redigera.</p></div></div>
-        <div class="upc">${rest.map((h, k) => upcoming(h, k)).join('')}</div></section>`;
+        <div class="upc">${rest.map((h, k) => upcoming(h, k, dm)).join('')}</div></section>`;
     }
     if (done.length) {
       html += `<section class="sec"><div class="sec-h"><div><h2>Klara starter</h2></div></div>
@@ -520,6 +554,7 @@ const V = {
         <label class="f">Datum<input id="f-date" type="date" data-path="event.date" value="${esc(ev.date)}"></label>
         <label class="f">Nedräkning (sekunder)<input id="f-cd" type="number" inputmode="numeric" min="3" max="120" data-path="event.countdown" value="${esc(ev.countdown)}"></label>
       </div>
+      <label class="chk"><input id="f-auto" type="checkbox" data-path="event.auto"${ev.auto ? ' checked' : ''}> Automatiska starter: när första starten har gått rullar nästa igång automatiskt ${+ev.interval || 30} min efter föregående (minuter ändras under Startlista)</label>
       <label class="chk"><input id="f-sound" type="checkbox" data-path="event.sound"${ev.sound ? ' checked' : ''}> Ljud: trumslag varje sekund, mässingsstötar på 3-2-1 och fanfar vid GOGO!</label>
       <div class="grid">
         <label class="f">Färg ihop med grönt på GOGO!<select id="f-gocolor" data-path="event.goColor" style="width:100%;background:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-height:46px;font-size:16px;color:var(--text)">
@@ -544,10 +579,11 @@ const V = {
   },
 };
 
-function upcoming(h, k) {
-  const sel = ui.upSel === h.id, es = entriesOf(h);
+function upcoming(h, k, dm) {
+  const sel = ui.upSel === h.id, es = entriesOf(h), d = dm && dm.get(h.id);
   return `<div class="uc ${sel ? 'sel' : ''}" role="button" tabindex="0" data-act="up-sel" data-id="${h.id}" aria-expanded="${sel}">
-    <div class="hd"><span class="tm">${esc(h.time)}</span><span class="ti">${esc(h.title)}</span><span class="in js-until" data-min="${toMin(h.time) ?? ''}"></span></div>
+    <div class="hd"><span class="tm">${esc(h.time)}</span><span class="ti">${esc(h.title)}</span>${d ? '' : `<span class="in js-until" data-min="${toMin(h.time) ?? ''}"></span>`}</div>
+    ${d ? `<div class="due-row"><div class="t"><span>Start kl ${fmtClock(d.due, true)}</span><b class="js-due" data-due="${d.due}">–</b></div><div class="pbar sm"><i class="js-pbar" data-due="${d.due}" data-from="${d.from}"></i></div></div>` : ''}
     <ul>${es.map(e => `<li><b>${esc(e.nr)}</b><span>${esc(names(e))}<small>${esc(e.cls)}</small></span></li>`).join('') || '<li><span class="muted">Inga startande</span></li>'}</ul>
     ${sel ? `<div class="ucacts">
         <button class="btn primary sm" type="button" data-act="cd-start" data-id="${h.id}">Nedräkning</button>
@@ -615,10 +651,10 @@ function startHeat(id, at) {
   toast(`${h.title} startad ${fmtClock(h.startedAt, true)}`);
   ui.tab = 'tid'; render();
 }
-function beginCountdown(id, preview) {
+function beginCountdown(id, preview, target) {
   const h = preview ? { title:'Test – ingen start' } : state.heats.find(x => x.id === id); if (!h) return;
   ac();
-  ui.cd = { id, target: Date.now() + (+state.event.countdown || 10) * 1000, last:null, goUntil:null };
+  ui.cd = { id, target: target || Date.now() + (+state.event.countdown || 10) * 1000, last:null, goUntil:null, auto: !!target };
   $('#cd-sub').textContent = preview ? h.title : `${h.title} · ${entriesOf(h).map(e => e.nr).join(', ')}`;
   if (preview) ui.cd.preview = true;
   $('#cd-ctl').hidden = false; $('#cd').classList.remove('gogo'); $('#cd').querySelectorAll('.ring,.spark').forEach(r => r.remove()); $('#cd').classList.remove('hit'); $('#cd').hidden = false; tick();
@@ -704,7 +740,25 @@ function tick() {
     const diff = d - now;
     e.textContent = diff > 0 && diff < 6 * 3600000 ? `om ${fmtTime(diff)}` : diff <= 0 && diff > -3600000 ? `${fmtTime(-diff)} sen` : '';
   });
+  document.querySelectorAll('.js-due').forEach(e => {
+    const d = +e.dataset.due - now;
+    e.textContent = d > 0 ? fmtTime(d) : `Försenad ${fmtTime(-d)}`;
+    e.classList.toggle('late', d <= 0);
+  });
+  document.querySelectorAll('.js-pbar').forEach(e => {
+    const a = +e.dataset.from, b = +e.dataset.due;
+    e.style.width = Math.max(0, Math.min(100, (now - a) / (b - a) * 100)).toFixed(1) + '%';
+  });
+  autoTick(now);
   cdTick();
+}
+function autoTick(now) {   // starta nedräkningen automatiskt när det är dags
+  if (!state.event.auto || state.event.autoPaused || ui.cd) return;
+  const h = state.heats.find(x => !x.startedAt); if (!h) return;
+  const d = dueMap().get(h.id); if (!d) return;
+  const cdMs = (+state.event.countdown || 10) * 1000;
+  if (ui.autoSkip === h.id + ':' + d.due) return;            // nedräkningen avbröts – vänta på manuell start
+  if (now >= d.due - cdMs && now < d.due - 500) beginCountdown(h.id, false, d.due);
 }
 setInterval(tick, 200);
 
@@ -820,6 +874,7 @@ document.addEventListener('click', e => {
     if (el) { el.scrollIntoView({ block:'center' }); el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 2500); }
   }
   else if (a === 'cd-test') beginCountdown(null, true);
+  else if (a === 'auto-pause') { state.event.autoPaused = !state.event.autoPaused; save(); render(); toast(state.event.autoPaused ? 'Automatiken pausad. Starta nästa manuellt.' : 'Automatiken är på igen'); }
   else if (a === 'go-test') {   // visa GOGO! utan att starta något
     ac();
     $('#cd-lbl').textContent = ''; $('#cd-sub').textContent = 'Test – ingen start'; $('#cd-ctl').hidden = true;
@@ -842,7 +897,7 @@ document.addEventListener('click', e => {
     delete state.res[en.nr]; h.lanes = serialize(es); save(); render(); toast(`Nr ${en.nr} borttagen`);
   }
   else if (a === 'cd-start') beginCountdown(b.dataset.id);
-  else if (a === 'cd-cancel') { ui.cd = null; $('#cd').hidden = true; render(); }
+  else if (a === 'cd-cancel') { if (ui.cd?.auto) ui.autoSkip = ui.cd.id + ':' + ui.cd.target; ui.cd = null; $('#cd').hidden = true; render(); }
   else if (a === 'start-now') startHeat(b.dataset.id);
   else if (a === 'ask-reset') {
     const h = state.heats.find(x => x.id === b.dataset.id);
@@ -894,6 +949,7 @@ document.addEventListener('click', e => {
 function wake() { navigator.wakeLock?.request('screen').catch(() => {}); }
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { wake(); render(); } });
 document.addEventListener('pointerdown', wake, { once:true });
+document.addEventListener('pointerdown', () => ac());   // låser upp ljudet så att automatiska nedräkningar hörs
 // Varna om man stänger fliken under pågående lopp
 window.addEventListener('beforeunload', e => { if (state.heats.some(h => heatStatus(h) === 'run')) { e.preventDefault(); e.returnValue = ''; } });
 
