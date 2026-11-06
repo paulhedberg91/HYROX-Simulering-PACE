@@ -5,7 +5,7 @@ En webbapp för iPad, i en enda fil (`index.html`). Ingen installation och inga 
 
 ## Så funkar det på eventdagen
 1. **Tidtagning → Nästa start.** Tryck **Nedräkning 10 s**. Skärmen räknar ner i helskärm med en mjuk ljuspuls per sekund (blått 10–6, orange 5–2, grönt 1–0). Ljudet är ett trumslag varje sekund, med mässingsstötar på 3-2-1. Vid noll kommer en tyst explosion med tryckvåg och strålar, och ett stort **GOGO!** slår in, utan blinkningar. Klockan för starten börjar exakt vid noll. Det finns också **Starta direkt** utan nedräkning. Under *Inställningar* kan du testa nedräkningen och ljudet utan att något startar.
-2. **Automatiska starter (på som standard):** när första starten har gått rullar nästa start igång automatiskt **30 min efter föregående**. Minuterna ställer du in direkt i appen med −5/−1/+1/+5, längst ner under Tidtagning eller under Inställningar. Nedräkningen och GOGO! körs av sig själv, och starttiden blir exakt. Varje kommande start visar en egen nedräkning med klockslag och förloppsstapel. Med **Pausa automatik** pausar du om något drar ut på tiden. Avbryter du en automatisk nedräkning står starten som *Försenad* tills du startar den manuellt, och efterföljande starter räknas från den faktiska starten. Automatiken kan stängas av under Inställningar.
+2. **Automatiska starter (på som standard):** när första starten har gått rullar nästa start igång automatiskt **30 min efter föregående**. Minuterna ställer du in direkt i appen med −5/−1/+1/+5, längst ner under Tidtagning eller under Inställningar. Nedräkningen och GOGO! körs av sig själv, och starttiden blir exakt. Varje kommande start visar en egen nedräkning med klockslag och förloppsstapel. Med **Pausa automatik** pausar du om något drar ut på tiden. **Appen behöver inte vara öppen eller ligga framme:** om iPaden låg i en annan flik eller app när ett heat skulle gå registreras starten ändå på exakt rätt klockslag (08:30, 09:00, 09:30 …) så fort appen öppnas igen. Nedräkningen och GOGO! syns bara om appen ligger framme. Avbryter du en automatisk nedräkning står starten som *Väntar på start* tills du startar den manuellt, och efterföljande starter räknas från den faktiska starten. Automatiken kan stängas av under Inställningar.
 3. Varje pågående start visas med sin löpande tid och en ruta per startnummer. Flera starter kan pågå samtidigt, och den äldsta ligger överst.
 4. **När ett lag går i mål trycker du på dess ruta.** Sluttiden sparas direkt, och rutan blir grön och visar tiden.
 5. **Tryckte du fel?** Tryck på rutan igen och välj **Ångra målgång**. Om ett lag bryter trycker du på rutan och väljer **Bröt loppet (DNF)**.
@@ -28,6 +28,7 @@ En webbapp för iPad, i en enda fil (`index.html`). Ingen installation och inga 
 ## Viktigt
 - Allt sparas automatiskt på iPaden (`localStorage`). **Använd inte privat surfning.**
 - Ta en **backup** under *Inställningar* ett par gånger under dagen. *Exportera resultat (CSV)* går att öppna i Excel eller Numbers.
+- Om tider från en annan dag ligger kvar, till exempel från ett test kvällen innan, varnar appen och erbjuder **↺ Starta om allt**. Sådana starter startas aldrig i efterhand.
 - Testa gärna i förväg och tryck sedan **↺ Starta om allt** före eventet.
 
 ## Öppna på iPaden

@@ -426,6 +426,10 @@ const V = {
       autoHtml = `<div class="autobar ${p ? 'paused' : ''}"><div><span class="dot"></span><b>Automatiska starter ${p ? 'pausade' : 'PÅ'}</b> <span class="muted">· ${begun ? 'nästa start rullar igång' : 'när första starten har gått rullar nästa igång'} så här många minuter efter föregående</span></div>
         <div class="acts2">${ivStepper()}${begun ? `<button class="btn sm" type="button" data-act="auto-pause">${p ? '▶ Fortsätt automatik' : '❚❚ Pausa automatik'}</button>` : ''}</div></div>`;
     }
+    if (state.heats.some(h => h.startedAt && !sameDay(h.startedAt, Date.now()))) {
+      html += `<div class="autobar paused" style="border-style:solid;border-color:var(--warn)"><div><span class="dot"></span><b>Tider från en annan dag ligger kvar</b> <span class="muted">· troligen från ett test. Starta om allt innan eventet börjar.</span></div>
+        <button class="btn sm danger" type="button" data-act="ask-reset-all">↺ Starta om allt</button></div>`;
+    }
     if (nx) {
       const es = entriesOf(nx);
       html += `<section class="sec"><div class="next">
@@ -723,7 +727,7 @@ function tick() {
   });
   document.querySelectorAll('.js-due').forEach(e => {
     const d = +e.dataset.due - now;
-    e.textContent = d > 0 ? fmtTime(d) : `Försenad ${fmtTime(-d)}`;
+    e.textContent = d > 0 ? fmtTime(d) : `Väntar på start · ${fmtTime(-d)}`;
     e.classList.toggle('late', d <= 0);
   });
   document.querySelectorAll('.js-pbar').forEach(e => {
@@ -733,13 +737,26 @@ function tick() {
   autoTick(now);
   cdTick();
 }
-function autoTick(now) {   // starta nedräkningen automatiskt när det är dags
+const sameDay = (a, b) => new Date(a).toDateString() === new Date(b).toDateString();   // gamla tester från en annan dag startas inte i efterhand
+function autoTick(now) {   // automatiska starter enligt schemat – fungerar även om appen legat i bakgrunden
   if (!state.event.auto || state.event.autoPaused || ui.cd) return;
-  const h = state.heats.find(x => !x.startedAt); if (!h) return;
-  const d = dueMap().get(h.id); if (!d) return;
-  const cdMs = (+state.event.countdown || 10) * 1000;
-  if (ui.autoSkip === h.id + ':' + d.due) return;            // nedräkningen avbröts – vänta på manuell start
-  if (now >= d.due - cdMs && now < d.due - 500) beginCountdown(h.id, false, d.due);
+  const cdMs = (+state.event.countdown || 10) * 1000, caught = [];
+  for (let guard = 0; guard < 50; guard++) {
+    const h = state.heats.find(x => !x.startedAt); if (!h) break;
+    const d = dueMap().get(h.id); if (!d) break;
+    if (state.event.autoSkip === h.id + ':' + d.due) break;   // nedräkningen avbröts – vänta på manuell start
+    if (now >= d.due) {
+      // starttiden har passerat medan appen inte var aktiv: registrera starten på exakt rätt klockslag
+      if (!sameDay(d.due, now)) break;
+      h.startedAt = d.due; caught.push(h); continue;
+    }
+    if (now >= d.due - cdMs && d.due - now > 400) beginCountdown(h.id, false, d.due);
+    break;
+  }
+  if (caught.length) {
+    save(); render();
+    toast(caught.map(h => `${h.title} startade automatiskt ${fmtClock(h.startedAt, true)}`).join(' · '));
+  }
 }
 setInterval(tick, 200);
 
@@ -857,7 +874,7 @@ document.addEventListener('click', e => {
   else if (a === 'cd-test') beginCountdown(null, true);
   else if (a === 'iv') {
     state.event.interval = Math.max(1, Math.min(180, (+state.event.interval || 30) + +b.dataset.d));
-    ui.autoSkip = null; save(); const y = scrollY; render(); scrollTo(0, y);
+    state.event.autoSkip = null; save(); const y = scrollY; render(); scrollTo(0, y);
     toast(`${state.event.interval} min mellan starter`);
   }
   else if (a === 'auto-pause') { state.event.autoPaused = !state.event.autoPaused; save(); render(); toast(state.event.autoPaused ? 'Automatiken pausad. Starta nästa manuellt.' : 'Automatiken är på igen'); }
@@ -883,7 +900,7 @@ document.addEventListener('click', e => {
     delete state.res[en.nr]; h.lanes = serialize(es); save(); render(); toast(`Nr ${en.nr} borttagen`);
   }
   else if (a === 'cd-start') beginCountdown(b.dataset.id);
-  else if (a === 'cd-cancel') { if (ui.cd?.auto) ui.autoSkip = ui.cd.id + ':' + ui.cd.target; ui.cd = null; $('#cd').hidden = true; render(); }
+  else if (a === 'cd-cancel') { if (ui.cd?.auto) { state.event.autoSkip = ui.cd.id + ':' + ui.cd.target; save(); } ui.cd = null; $('#cd').hidden = true; render(); }
   else if (a === 'start-now') startHeat(b.dataset.id);
   else if (a === 'ask-reset') {
     const h = state.heats.find(x => x.id === b.dataset.id);
@@ -927,13 +944,13 @@ document.addEventListener('click', e => {
     const q = a === 'ask-seed' ? 'Ersätt startlistan med originalet och rensa alla tider?' : 'Starta om allt? Alla starter och tider raderas, startlistan ligger kvar.';
     $('#reset-box').innerHTML = `<span>${q} Det går inte att ångra.</span><button class="btn danger" type="button" data-act="${a.slice(4)}">Ja</button><button class="btn ghost" type="button" data-act="tab" data-tab="inst">Avbryt</button>`;
   }
-  else if (a === 'clear-times') { state.heats.forEach(h => h.startedAt = null); state.res = {}; ui.pending = null; ui.upSel = null; ui.tab = 'tid'; save(); render(); scrollTo(0, 0); toast('Allt är nollställt. Start 1 är redo.'); }
+  else if (a === 'clear-times') { state.heats.forEach(h => h.startedAt = null); state.res = {}; state.event.autoSkip = null; ui.pending = null; ui.upSel = null; ui.tab = 'tid'; save(); render(); scrollTo(0, 0); toast('Allt är nollställt. Start 1 är redo.'); }
   else if (a === 'seed') { const ev = state.event; state = seed(); state.event = ev; save(); render(); toast('Originalstartlistan återställd'); }
 });
 
 // Håll skärmen vaken under tidtagning
 function wake() { navigator.wakeLock?.request('screen').catch(() => {}); }
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { wake(); render(); } });
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { wake(); autoTick(Date.now()); render(); } });
 document.addEventListener('pointerdown', wake, { once:true });
 document.addEventListener('pointerdown', () => ac());   // låser upp ljudet så att automatiska nedräkningar hörs
 // Varna om man stänger fliken under pågående lopp
