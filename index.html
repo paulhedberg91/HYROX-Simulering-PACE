@@ -169,7 +169,7 @@ textarea{resize:vertical;line-height:1.5;min-height:110px}
 
 /* Nedräkning */
 #cd{position:fixed;inset:0;z-index:100;display:grid;place-items:center;align-content:center;text-align:center;gap:10px;padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));--cdc:var(--accent);background:radial-gradient(60% 60% at 50% 50%, color-mix(in srgb,var(--cdc) 26%,var(--ink)) 0%, var(--ink) 75%);transition:background .3s}
-#cd{overflow:hidden}
+#cd{overflow:hidden;padding-top:clamp(70px,11vmin,120px)!important;padding-bottom:clamp(120px,17vmin,180px)!important}
 #cd::before{content:"";position:absolute;inset:0;background:var(--cdc);opacity:0;pointer-events:none}
 /* Lugn puls: en mjuk ljusvåg per sekund, ingen skakning */
 #cd.flash::before{animation:cdflash 1s ease-out}
@@ -187,7 +187,11 @@ textarea{resize:vertical;line-height:1.5;min-height:110px}
 #cd .cd-top span{font-size:clamp(10px,1.5vmin,14px);font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);border-left:1px solid var(--line);padding-left:14px;max-width:16ch;line-height:1.35}
 #cd .cd-foot{bottom:0;display:grid;justify-items:center;gap:10px;padding:0 16px max(18px,env(safe-area-inset-bottom,0px))}
 #cd .cd-foot .t{font-size:clamp(10px,1.4vmin,13px);font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:var(--muted)}
-#cd .cd-foot .logos{display:flex;flex-wrap:wrap;justify-content:center;gap:clamp(8px,1.4vmin,14px)}
+#cd .cd-foot .slider{width:min(100%,1100px);overflow:hidden;-webkit-mask:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
+#cd .cd-foot .logos{display:flex;width:max-content;gap:clamp(8px,1.4vmin,14px);padding:6px 0 14px;animation:sponsorslide 28s linear infinite}
+#cd .cd-foot .logos span{margin-right:0}
+@keyframes sponsorslide{from{transform:translateX(0)}to{transform:translateX(calc(-50% - clamp(4px,.7vmin,7px)))}}
+@media (prefers-reduced-motion:reduce){#cd .cd-foot .logos{animation:none;flex-wrap:wrap;width:auto;justify-content:center}#cd .cd-foot .logos .dup{display:none}}
 #cd .cd-foot .logos span{display:flex;align-items:center;justify-content:center;box-sizing:border-box;height:clamp(40px,7.5vmin,72px);padding:clamp(4px,.8vmin,8px) clamp(8px,1.4vmin,14px);background:#fff;border-radius:10px;box-shadow:0 4px 18px rgba(0,0,0,.35)}
 #cd .cd-foot .logos img{display:block;height:100%;width:auto;max-width:clamp(80px,16vmin,170px);object-fit:contain}
 #cd .cd-foot .logos span.sq{padding:0;overflow:hidden}
@@ -670,7 +674,9 @@ const SPONSORS = [
 function renderSponsors() {
   const el = $('#cd-spons');
   el.hidden = !state.event.sponsors;
-  el.innerHTML = `<div class="t">Tack till våra sponsorer</div><div class="logos">${SPONSORS.map(x => `<span class="${x.sq ? 'sq' : ''}"><img src="${x.src}" alt="${esc(x.name)}"></span>`).join('')}</div>`;
+  // två uppsättningar i rad ger en sömlös slinga som glider åt vänster
+  const set = dup => SPONSORS.map(x => `<span class="${x.sq ? 'sq' : ''}${dup ? ' dup' : ''}"${dup ? ' aria-hidden="true"' : ''}><img src="${x.src}" alt="${dup ? '' : esc(x.name)}"></span>`).join('');
+  el.innerHTML = `<div class="t">Tack till våra sponsorer</div><div class="slider"><div class="logos">${set(false)}${set(true)}</div></div>`;
 }
 const GOCOL = {
   blue:  { label:'PACE-blå (rekommenderad)', g2:'#3ba7e6', text:'#ffffff' },
