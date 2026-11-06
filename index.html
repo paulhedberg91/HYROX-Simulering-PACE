@@ -208,6 +208,23 @@ textarea{resize:vertical;line-height:1.5;min-height:110px}
 #cd .big{font-family:var(--font-display);font-weight:900;line-height:.85;font-size:min(46vh,50vw);font-variant-numeric:tabular-nums;color:#fff;-webkit-text-stroke:.5vmin var(--cdc);text-shadow:0 0 2vmin var(--cdc),0 0 8vmin var(--cdc)}
 #cd .sub{font-weight:700;letter-spacing:.12em;text-transform:uppercase;font-size:clamp(16px,2.6vw,28px);color:var(--muted)}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--text);color:var(--ink);padding:12px 20px;border-radius:999px;font-weight:700;z-index:120;max-width:calc(100% - 32px);text-align:center}
+/* Sponsorvisning: helskärm i ca 8 s, var 48:e sekund när ingen rört skärmen */
+#spshow{position:fixed;inset:0;z-index:90;display:grid;place-items:center;align-content:center;gap:clamp(18px,4vmin,40px);padding:24px max(24px,env(safe-area-inset-right,0px)) 24px max(24px,env(safe-area-inset-left,0px));background:radial-gradient(70% 70% at 50% 40%, #16233d 0%, var(--ink) 75%);animation:spin .6s ease-out;cursor:pointer}
+#spshow.out{animation:spout .6s ease-in forwards}
+@keyframes spin{from{opacity:0}to{opacity:1}}
+@keyframes spout{to{opacity:0}}
+#spshow .sp-pace{height:clamp(40px,8vmin,80px);width:auto;opacity:.95}
+#spshow .sp-t{font-family:var(--font-display);font-weight:800;text-transform:uppercase;font-size:clamp(26px,6vmin,64px);letter-spacing:.03em;line-height:1}
+#spshow .sp-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(12px,2.4vmin,28px);width:min(100%,1100px)}
+#spshow .sp-grid span{display:flex;align-items:center;justify-content:center;height:clamp(80px,17vmin,190px);padding:clamp(10px,2vmin,22px);background:#fff;border-radius:16px;box-shadow:0 10px 40px rgba(0,0,0,.4);opacity:0;animation:sppop .7s cubic-bezier(.2,1.3,.4,1) forwards}
+#spshow .sp-grid img{display:block;max-height:100%;max-width:100%;width:auto;height:100%;object-fit:contain}
+@keyframes sppop{from{opacity:0;transform:translateY(20px) scale(.92)}to{opacity:1;transform:none}}
+#spshow .sp-bar{width:min(60%,420px);height:6px;border-radius:999px;background:var(--line);overflow:hidden}
+#spshow .sp-bar i{display:block;height:100%;background:var(--accent);animation:spbar var(--spdur,8s) linear forwards}
+@keyframes spbar{from{width:0}to{width:100%}}
+#spshow .sp-hint{font-size:13px;color:var(--muted);letter-spacing:.06em}
+@media (max-width:600px){#spshow .sp-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (prefers-reduced-motion:reduce){#spshow,#spshow .sp-grid span{animation:none;opacity:1}}
 @media (prefers-reduced-motion:reduce){.tile{transition:none}#cd.flash .big,#cd .big.go,#cd .ring,#cd .rays,#cd.gogo{animation:none}#cd.flash::before{animation:none}#cd.gogo::before{animation:none;opacity:.3}}
 </style>
 </head>
@@ -241,6 +258,13 @@ textarea{resize:vertical;line-height:1.5;min-height:110px}
   </div>
   <div class="cd-abs cd-foot" id="cd-spons"></div>
 </div>
+<div id="spshow" hidden role="dialog" aria-label="Våra sponsorer">
+  <img class="sp-pace" src="assets/pace.png" alt="PACE Performance &amp; Training">
+  <div class="sp-t">Tack till våra sponsorer</div>
+  <div class="sp-grid" id="sp-grid"></div>
+  <div class="sp-bar"><i></i></div>
+  <div class="sp-hint">Tryck var som helst för att stänga</div>
+</div>
 <div class="toast" id="toast" hidden></div>
 
 <script>
@@ -272,7 +296,7 @@ const SEED = [
 ];
 const seed = () => ({
   v: 1, seedVersion: SEED_VERSION,
-  event: { name:'HYROX Simulation', date:'2026-11-07', interval:30, countdown:10, sound:true, goColor:'blue', sponsors:true, auto:true, autoPaused:false },
+  event: { name:'HYROX Simulation', date:'2026-11-07', interval:30, countdown:10, sound:true, goColor:'blue', sponsors:true, sponsorShow:true, auto:true, autoPaused:false },
   heats: SEED.map(([time, rows], i) => ({ id:uid(), title:`Heat ${i+1}`, time, lanes:rows.join('\n'), startedAt:null })),
   res: {},   // nyckel: startnummer -> { fin: tidsstämpel ms, dnf: bool }
 });
@@ -552,6 +576,8 @@ const V = {
       </div>
       <label class="chk"><input id="f-auto" type="checkbox" data-path="event.auto"${ev.auto ? ' checked' : ''}> Automatiska starter: när första heatet har gått startar resten enligt startlistans tider (08:30, 09:00 … 12:45, 13:00 …)</label>
       <div class="row"><span class="eyebrow">Flytta alla kommande heat (nästa heat visas i mitten)</span>${ivStepper()}</div>
+      <label class="chk"><input id="f-spshow" type="checkbox" data-path="event.sponsorShow"${ev.sponsorShow ? ' checked' : ''}> Sponsorvisning i helskärm: var 48:e sekund i 8 sekunder (bara under Tidtagning, när ingen rört skärmen och ingen start är nära)</label>
+      <div><button class="btn sm" type="button" data-act="sp-test">Testa sponsorvisning</button></div>
       <label class="chk"><input id="f-spons" type="checkbox" data-path="event.sponsors"${ev.sponsors ? ' checked' : ''}> Visa sponsorer längst ner i nedräkningen</label>
       <label class="chk"><input id="f-sound" type="checkbox" data-path="event.sound"${ev.sound ? ' checked' : ''}> Ljud under nedräkningen: trumslag varje sekund och mässingsstötar på 3-2-1 (GOGO! är tyst)</label>
       <div class="grid">
@@ -681,6 +707,30 @@ const SPONSORS = [
   { name:'Toveks Bil', src:'assets/toveks.jpg' },
   { name:'Hajen Lågpris', src:'assets/hajen.jpg' },
 ];
+const SP_EVERY = 48000, SP_SHOW = 8000;
+let spLast = Date.now(), spOpenUntil = 0, spT = null;
+function showSponsors(force) {
+  const el = $('#spshow');
+  $('#sp-grid').innerHTML = SPONSORS.map((x, i) => `<span class="${x.sq ? 'sq' : ''}" style="animation-delay:${.15 + i * .18}s"><img src="${x.src}" alt="${esc(x.name)}"></span>`).join('');
+  el.style.setProperty('--spdur', SP_SHOW / 1000 + 's');
+  el.classList.remove('out'); el.hidden = false;
+  spOpenUntil = Date.now() + SP_SHOW;
+  clearTimeout(spT); spT = setTimeout(hideSponsors, SP_SHOW);
+}
+function hideSponsors() {
+  const el = $('#spshow'); if (el.hidden) return;
+  clearTimeout(spT); el.classList.add('out');
+  setTimeout(() => { el.hidden = true; el.classList.remove('out'); }, 550);
+  spOpenUntil = 0; spLast = Date.now();
+}
+function sponsorTick(now) {   // visa sponsorerna när det är lugnt – aldrig mitt i en start eller medan någon arbetar
+  if (!state.event.sponsorShow || ui.cd || spOpenUntil || ui.tab !== 'tid') { if (ui.cd && spOpenUntil) hideSponsors(); return; }
+  if (now - spLast < SP_EVERY) return;
+  if (ui.pending || ui.editing || ui.upSel || document.activeElement?.matches?.('input,textarea,select')) { spLast = now - SP_EVERY + 5000; return; }
+  const nx = state.heats.find(h => !h.startedAt), d = nx && dueMap().get(nx.id);
+  if (d && !state.event.autoPaused && d.due - now < SP_SHOW + (+state.event.countdown || 10) * 1000 + 5000) return;   // en start är nära
+  showSponsors();
+}
 function renderSponsors() {
   const el = $('#cd-spons');
   el.hidden = !state.event.sponsors;
@@ -745,6 +795,7 @@ function tick() {
     e.style.width = Math.max(0, Math.min(100, (now - a) / (b - a) * 100)).toFixed(1) + '%';
   });
   autoTick(now);
+  sponsorTick(now);
   cdTick();
 }
 const sameDay = (a, b) => new Date(a).toDateString() === new Date(b).toDateString();   // gamla tester från en annan dag startas inte i efterhand
@@ -882,6 +933,7 @@ document.addEventListener('click', e => {
     if (el) { el.scrollIntoView({ block:'center' }); el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 2500); }
   }
   else if (a === 'cd-test') beginCountdown(null, true);
+  else if (a === 'sp-test') showSponsors(true);
   else if (a === 'iv') {
     // flytta alla kommande heat lika mycket – avstånden mellan dem behålls
     const d = +b.dataset.d, up = state.heats.filter(h => !h.startedAt && toMin(h.time) != null);
@@ -965,7 +1017,9 @@ document.addEventListener('click', e => {
 function wake() { navigator.wakeLock?.request('screen').catch(() => {}); }
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { wake(); autoTick(Date.now()); render(); } });
 document.addEventListener('pointerdown', wake, { once:true });
-document.addEventListener('pointerdown', () => ac());   // låser upp ljudet så att automatiska nedräkningar hörs
+document.addEventListener('pointerdown', () => ac());
+document.addEventListener('pointerdown', e => { if (!e.target.closest('#spshow')) spLast = Date.now(); }, true);   // någon arbetar – vänta med sponsorvisningen
+$('#spshow').addEventListener('click', e => { e.stopPropagation(); hideSponsors(); });   // låser upp ljudet så att automatiska nedräkningar hörs
 // Varna om man stänger fliken under pågående lopp
 window.addEventListener('beforeunload', e => { if (state.heats.some(h => heatStatus(h) === 'run')) { e.preventDefault(); e.returnValue = ''; } });
 
