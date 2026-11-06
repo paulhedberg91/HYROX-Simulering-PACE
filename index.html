@@ -88,6 +88,9 @@ main.wrap{padding-block:20px 90px;display:grid;gap:20px}
 .pbar.sm{height:6px}
 .autobar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:10px 16px;border-radius:14px;border:1px dashed var(--line);background:transparent;font-size:14px}
 .autobar .dot{width:10px;height:10px;border-radius:50%;background:var(--go);display:inline-block;margin-right:8px;box-shadow:0 0 8px var(--go)}
+.ivs{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap}
+.ivs b{font-family:var(--font-num);font-size:22px;min-width:3.6em;text-align:center;font-variant-numeric:tabular-nums}
+.autobar .acts2{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .autobar.paused .dot{background:var(--warn);box-shadow:none}
 .uc .due-row{display:grid;gap:6px}
 .uc .due-row .t{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
@@ -175,26 +178,24 @@ textarea{resize:vertical;line-height:1.5;min-height:110px}
 #cd .ring{position:absolute;left:50%;top:50%;width:50vmin;height:50vmin;margin:-25vmin 0 0 -25vmin;border-radius:50%;border:1vmin solid var(--cdc);box-shadow:0 0 3vmin var(--cdc);pointer-events:none;animation:cdring 1.1s cubic-bezier(.15,.6,.3,1) forwards}
 @keyframes cdring{0%{transform:scale(.4);opacity:.6}100%{transform:scale(2.8);opacity:0}}
 #cd.c-blue{--cdc:#3ba7e6}#cd.c-orange{--cdc:#ff8a1f}#cd.c-green{--cdc:var(--go)}
-#cd>*:not(.ring):not(.spark){position:relative;z-index:1}
-/* GOGO! – en kraftig ljusvåg som tonar ut, inga blixtar. Färg 2 (--g2) väljs under Inställningar */
-#cd.gogo{--g2:#3ba7e6;background:radial-gradient(60% 60% at 50% 50%, color-mix(in srgb,var(--go) 45%,var(--ink)) 0%, color-mix(in srgb,var(--go) 18%,var(--ink)) 85%)}
-#cd.gogo::before{animation:gobloom 2.6s ease-out forwards}
-@keyframes gobloom{0%{opacity:.7;background:var(--go)}25%{opacity:.4;background:var(--g2)}100%{opacity:.12;background:var(--go)}}
-#cd .spark{position:absolute;left:50%;top:50%;width:3.2vmin;height:3.2vmin;margin:-1.6vmin;border-radius:50%;background:var(--sc,var(--go));box-shadow:0 0 2vmin var(--sc,var(--go));pointer-events:none;animation:spark 1.5s cubic-bezier(.2,.7,.35,1) forwards}
-@keyframes spark{0%{transform:rotate(var(--a)) translateX(0) scale(1.6);opacity:1}55%{opacity:1}100%{transform:rotate(var(--a)) translateX(var(--d)) scale(.4);opacity:0}}
-#cd .big.go.hit{animation:gohit .22s ease-out,gopulse 1s ease-in-out .22s infinite alternate}
-@keyframes gohit{0%{transform:scale(1.14)}100%{transform:scale(1)}}
-#cd.gogo.hit::before{animation:gohitflash .3s ease-out forwards}
-@keyframes gohitflash{0%{opacity:.45;background:var(--g2)}100%{opacity:.12;background:var(--go)}}
+#cd>*:not(.ring):not(.rays){position:relative;z-index:1}
+/* GOGO! – en explosion utan blink: texten slår in, en ljuskägla av strålar och en tryckvåg, en gång. Färg 2 (--g2) väljs under Inställningar */
+#cd.gogo{--g2:#3ba7e6;background:radial-gradient(60% 60% at 50% 50%, color-mix(in srgb,var(--go) 38%,var(--ink)) 0%, color-mix(in srgb,var(--go) 12%,var(--ink)) 85%);animation:gopunch .5s cubic-bezier(.2,1,.3,1)}
+@keyframes gopunch{0%{transform:scale(1.04)}100%{transform:none}}
+#cd.gogo::before{opacity:1;background:radial-gradient(circle at 50% 50%, color-mix(in srgb,var(--go) 85%,#fff) 0%, color-mix(in srgb,var(--g2) 60%,transparent) 18%, transparent 55%);animation:goburst 1.4s cubic-bezier(.1,.7,.25,1) forwards}
+@keyframes goburst{0%{transform:scale(.15);opacity:1}100%{transform:scale(2.6);opacity:0}}
+#cd .rays{position:absolute;left:50%;top:50%;width:160vmax;height:160vmax;margin:-80vmax 0 0 -80vmax;border-radius:50%;pointer-events:none;background:repeating-conic-gradient(from 0deg, color-mix(in srgb,var(--go) 55%,transparent) 0deg 4deg, transparent 4deg 15deg);-webkit-mask:radial-gradient(circle, transparent 6%, #000 14%, #000 40%, transparent 62%);mask:radial-gradient(circle, transparent 6%, #000 14%, #000 40%, transparent 62%);animation:gorays 1.8s cubic-bezier(.1,.7,.25,1) forwards}
+@keyframes gorays{0%{transform:scale(.2) rotate(0deg);opacity:.9}100%{transform:scale(1.25) rotate(14deg);opacity:0}}
+#cd .ring.wave{border-width:2.4vmin;animation:cdwave 1s cubic-bezier(.05,.7,.25,1) forwards}
+@keyframes cdwave{0%{transform:scale(.3);opacity:.9}100%{transform:scale(4.2);opacity:0}}
 #cd .ring.g2{border-color:var(--g2);box-shadow:0 0 4vmin var(--g2),inset 0 0 4vmin var(--g2)}
-#cd .big.go{font-size:min(44vh,33vw);letter-spacing:.01em;color:var(--gt,#fff);-webkit-text-stroke:.5vmin #04140b;text-shadow:0 0 3vmin var(--g2),0 0 10vmin var(--go);animation:gozoom .7s cubic-bezier(.2,1.25,.4,1),gopulse 1s ease-in-out .7s infinite alternate}
-@keyframes gozoom{0%{transform:scale(2.2);opacity:0}100%{transform:none;opacity:1}}
-@keyframes gopulse{from{transform:scale(1)}to{transform:scale(1.04)}}
+#cd .big.go{font-size:min(44vh,33vw);letter-spacing:.01em;color:var(--gt,#fff);-webkit-text-stroke:.5vmin #04140b;text-shadow:0 0 3vmin var(--g2),0 0 10vmin var(--go);animation:goslam .5s cubic-bezier(.15,1.15,.35,1) forwards}
+@keyframes goslam{0%{transform:scale(3.4);opacity:0;filter:blur(2.5vmin)}60%{opacity:1;filter:blur(0)}100%{transform:none;opacity:1;filter:none}}
 #cd .lbl{font-weight:700;letter-spacing:.3em;text-transform:uppercase;font-size:clamp(20px,4vw,40px);padding-left:.3em}
 #cd .big{font-family:var(--font-display);font-weight:900;line-height:.85;font-size:min(60vh,55vw);font-variant-numeric:tabular-nums;color:#fff;-webkit-text-stroke:.5vmin var(--cdc);text-shadow:0 0 2vmin var(--cdc),0 0 8vmin var(--cdc)}
 #cd .sub{font-weight:700;letter-spacing:.12em;text-transform:uppercase;font-size:clamp(16px,2.6vw,28px);color:var(--muted)}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--text);color:var(--ink);padding:12px 20px;border-radius:999px;font-weight:700;z-index:120;max-width:calc(100% - 32px);text-align:center}
-@media (prefers-reduced-motion:reduce){.tile{transition:none}#cd.flash .big,#cd .big.go,#cd .ring{animation:none}#cd.flash::before{animation:none}#cd.gogo::before{animation:none;opacity:.3}}
+@media (prefers-reduced-motion:reduce){.tile{transition:none}#cd.flash .big,#cd .big.go,#cd .ring,#cd .rays,#cd.gogo{animation:none}#cd.flash::before{animation:none}#cd.gogo::before{animation:none;opacity:.3}}
 </style>
 </head>
 <body>
@@ -313,6 +314,10 @@ const plannedSpan = () => {
   const a = Math.min(...ms), b = Math.max(...ms) + (+state.event.interval || 30);
   return { a, b, ms:(b - a) * 60000 };
 };
+const ivStepper = () => `<span class="ivs" role="group" aria-label="Minuter mellan starter">
+  <button class="btn sm" type="button" data-act="iv" data-d="-5" aria-label="5 minuter kortare">−5</button><button class="btn sm" type="button" data-act="iv" data-d="-1" aria-label="1 minut kortare">−1</button>
+  <b>${+state.event.interval || 30} min</b>
+  <button class="btn sm" type="button" data-act="iv" data-d="1" aria-label="1 minut längre">+1</button><button class="btn sm" type="button" data-act="iv" data-d="5" aria-label="5 minuter längre">+5</button></span>`;
 const minTxt = m => `${pad(Math.floor(m / 60) % 24)}:${pad(m % 60)}`;
 
 /* ---------- Ljud ---------- */
@@ -362,47 +367,6 @@ function tickSound(s) {   // ett trumslag per sekund, de sista tre med mässings
   if (s > 3) { kick(t, s > 5 ? .45 : .6); return; }
   kick(t, .95);
   brass(t, [196, 293.7, 392], .32, .13, 2200);   // G-kvint, samma ton 3-2-1
-  if (s === 1) riser(t + .05, .93);              // sug uppåt in i GOGO!
-}
-function riser(t, dur) {   // brus som sveper uppåt in i GOGO! (sista sekunden)
-  const a = audio, n = Math.floor(a.sampleRate * dur), buf = a.createBuffer(1, n, a.sampleRate), d = buf.getChannelData(0);
-  for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
-  const src = a.createBufferSource(), f = a.createBiquadFilter(), g = a.createGain();
-  src.buffer = buf; f.type = 'bandpass'; f.Q.value = 1.2;
-  f.frequency.setValueAtTime(300, t); f.frequency.exponentialRampToValueAtTime(7000, t + dur);
-  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(.35, t + dur - .02); g.gain.linearRampToValueAtTime(0, t + dur);
-  src.connect(f); f.connect(g); g.connect(master); src.start(t); src.stop(t + dur);
-}
-function pow(t, vol = .6) {   // "POW": snabbt fallande slag + tryckvåg
-  const a = audio, o = a.createOscillator(), g = a.createGain();
-  o.type = 'square'; o.frequency.setValueAtTime(1100, t); o.frequency.exponentialRampToValueAtTime(55, t + .2);
-  env(g, t, .002, vol, .3); o.connect(g); g.connect(master); o.start(t); o.stop(t + .4);
-  noise(t, .35, .45, 400);
-}
-function boom(t) {   // djup explosion som klingar ut
-  const a = audio, o = a.createOscillator(), g = a.createGain();
-  o.type = 'sine'; o.frequency.setValueAtTime(95, t); o.frequency.exponentialRampToValueAtTime(28, t + 1.4);
-  env(g, t, .005, 1, 1.6); o.connect(g); g.connect(master); o.start(t); o.stop(t + 1.8);
-}
-function clap(t, vol = .5) {   // handklapp: tre snabba brusstötar
-  for (const dt of [0, .011, .023]) {
-    const a = audio, n = Math.floor(a.sampleRate * .12), buf = a.createBuffer(1, n, a.sampleRate), d = buf.getChannelData(0);
-    for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
-    const src = a.createBufferSource(), f = a.createBiquadFilter(), g = a.createGain();
-    src.buffer = buf; f.type = 'bandpass'; f.frequency.value = 1500; f.Q.value = .8;
-    env(g, t + dt, .001, vol, .1); src.connect(f); f.connect(g); g.connect(master); src.start(t + dt);
-  }
-}
-const GO_HITS = [.32, .56, .80];   // tre "GO!"-slag efter smällen (sekunder)
-function goSound() {   // GOGO!: BOOM + POW + cymbal, sedan GO! GO! GO! och ett slutackord
-  if (!ac()) return;
-  const t = audio.currentTime + .01;
-  boom(t); pow(t); kick(t, 1.3); noise(t, 2.2, .3, 3500);
-  const chords = [[261.6, 329.6, 392, 523.3], [293.7, 370, 440, 587.3], [329.6, 415.3, 493.9, 659.3]];   // stiger: C – D – E
-  GO_HITS.forEach((dt, i) => { const h = t + dt; kick(h, 1); clap(h, .45); brass(h, chords[i], .17, .15, 4200); });
-  const end = t + 1.05;
-  kick(end, 1.2); pow(end, .35); noise(end, 1.4, .18, 4000);
-  brass(end, [130.8, 261.6, 329.6, 392, 523.3, 784], 1.3, .17, 3800);   // stort C-dur
 }
 function beep(f, d) {   // kort pip vid målgång
   if (!ac()) return;
@@ -440,10 +404,10 @@ const V = {
     const done = state.heats.filter(h => heatStatus(h) === 'done');
     const nx = waiting[0], dm = dueMap();
     let html = '', autoHtml = '';
-    if (state.event.auto && state.heats.some(h => h.startedAt) && waiting.length) {
-      const p = state.event.autoPaused;
-      autoHtml = `<div class="autobar ${p ? 'paused' : ''}"><div><span class="dot"></span><b>Automatiska starter ${p ? 'pausade' : 'PÅ'}</b> <span class="muted">· nästa start rullar igång ${+state.event.interval || 30} min efter föregående, med nedräkning ${+state.event.countdown || 10} s</span></div>
-        <button class="btn sm" type="button" data-act="auto-pause">${p ? '▶ Fortsätt automatik' : '❚❚ Pausa automatik'}</button></div>`;
+    if (state.event.auto && waiting.length) {
+      const p = state.event.autoPaused, begun = state.heats.some(h => h.startedAt);
+      autoHtml = `<div class="autobar ${p ? 'paused' : ''}"><div><span class="dot"></span><b>Automatiska starter ${p ? 'pausade' : 'PÅ'}</b> <span class="muted">· ${begun ? 'nästa start rullar igång' : 'när första starten har gått rullar nästa igång'} så här många minuter efter föregående</span></div>
+        <div class="acts2">${ivStepper()}${begun ? `<button class="btn sm" type="button" data-act="auto-pause">${p ? '▶ Fortsätt automatik' : '❚❚ Pausa automatik'}</button>` : ''}</div></div>`;
     }
     if (nx) {
       const es = entriesOf(nx);
@@ -555,8 +519,9 @@ const V = {
         <label class="f">Datum<input id="f-date" type="date" data-path="event.date" value="${esc(ev.date)}"></label>
         <label class="f">Nedräkning (sekunder)<input id="f-cd" type="number" inputmode="numeric" min="3" max="120" data-path="event.countdown" value="${esc(ev.countdown)}"></label>
       </div>
-      <label class="chk"><input id="f-auto" type="checkbox" data-path="event.auto"${ev.auto ? ' checked' : ''}> Automatiska starter: när första starten har gått rullar nästa igång automatiskt ${+ev.interval || 30} min efter föregående (minuter ändras under Startlista)</label>
-      <label class="chk"><input id="f-sound" type="checkbox" data-path="event.sound"${ev.sound ? ' checked' : ''}> Ljud: trumslag varje sekund, mässingsstötar på 3-2-1 och fanfar vid GOGO!</label>
+      <label class="chk"><input id="f-auto" type="checkbox" data-path="event.auto"${ev.auto ? ' checked' : ''}> Automatiska starter: när första starten har gått rullar nästa igång automatiskt efter föregående</label>
+      <div class="row"><span class="eyebrow">Minuter mellan starter</span>${ivStepper()}</div>
+      <label class="chk"><input id="f-sound" type="checkbox" data-path="event.sound"${ev.sound ? ' checked' : ''}> Ljud under nedräkningen: trumslag varje sekund och mässingsstötar på 3-2-1 (GOGO! är tyst)</label>
       <div class="grid">
         <label class="f">Färg ihop med grönt på GOGO!<select id="f-gocolor" data-path="event.goColor" style="width:100%;background:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-height:46px;font-size:16px;color:var(--text)">
           ${Object.entries(GOCOL).map(([k, v]) => `<option value="${k}"${ev.goColor === k ? ' selected' : ''}>${v.label}</option>`).join('')}
@@ -658,7 +623,7 @@ function beginCountdown(id, preview, target) {
   ui.cd = { id, target: target || Date.now() + (+state.event.countdown || 10) * 1000, last:null, goUntil:null, auto: !!target };
   $('#cd-sub').textContent = preview ? h.title : `${h.title} · ${entriesOf(h).map(e => e.nr).join(', ')}`;
   if (preview) ui.cd.preview = true;
-  $('#cd-ctl').hidden = false; $('#cd').classList.remove('gogo'); $('#cd').querySelectorAll('.ring,.spark').forEach(r => r.remove()); $('#cd').classList.remove('hit'); $('#cd').hidden = false; tick();
+  $('#cd-ctl').hidden = false; $('#cd').classList.remove('gogo'); $('#cd').querySelectorAll('.ring,.rays').forEach(r => r.remove()); $('#cd').classList.remove('hit'); $('#cd').hidden = false; tick();
 }
 function cdColor(c, urgent) {   // byt färg, blixt + chockvåg varje sekund
   const el = $('#cd');
@@ -667,17 +632,6 @@ function cdColor(c, urgent) {   // byt färg, blixt + chockvåg varje sekund
   el.classList.add('c-' + c, 'flash');
   if (urgent) el.classList.add('urgent');
   ring(0);
-}
-function sparks(n) {   // gnistor som sprutar ut från mitten
-  const el = $('#cd');
-  for (let i = 0; i < n; i++) {
-    const sp = document.createElement('div'); sp.className = 'spark';
-    sp.style.setProperty('--a', (i / n * 360 + Math.random() * 12) + 'deg');
-    sp.style.setProperty('--d', (35 + Math.random() * 30) + 'vmax');
-    if (i % 2) sp.style.setProperty('--sc', 'var(--g2)');
-    sp.addEventListener('animationend', () => sp.remove());
-    el.appendChild(sp);
-  }
 }
 function ring(delay, cls) {
   setTimeout(() => {
@@ -693,22 +647,16 @@ const GOCOL = {
   navy:  { label:'Mörkblå – stark kontrast',  g2:'#0b2a4a', text:'#ffffff' },
   yellow:{ label:'Gul',                       g2:'#ffd60a', text:'#ffd60a' },
 };
-function gogo() {
+function gogo() {   // tyst explosion: en tryckvåg, strålar och texten som slår in – ingen blinkning
   const el = $('#cd');
-  el.classList.remove('flash', 'urgent', 'c-blue', 'c-orange');
+  el.classList.remove('flash', 'urgent', 'c-blue', 'c-orange', 'gogo');
   void el.offsetWidth;
   const gc = GOCOL[state.event.goColor] || GOCOL.blue;
   el.style.setProperty('--g2', gc.g2); el.style.setProperty('--gt', gc.text);
   el.classList.add('c-green', 'gogo');
-  ring(0); sparks(28);
-  goSound();
-  // tre "GO!"-slag i takt med ljudet: texten och ljuset ger ett kort tryck
-  [...GO_HITS, 1.05].forEach((dt, i) => setTimeout(() => {
-    if (!el.classList.contains('gogo')) return;
-    const n = $('#cd-num'); n.classList.remove('hit'); el.classList.remove('hit'); void n.offsetWidth;
-    n.classList.add('hit'); el.classList.add('hit'); ring(0, i % 2 ? '' : 'g2');
-    if (i === 3) sparks(18);
-  }, dt * 1000));
+  const rays = document.createElement('div'); rays.className = 'rays';
+  rays.addEventListener('animationend', () => rays.remove()); el.appendChild(rays);
+  ring(0, 'wave'); ring(120, 'wave g2');
 }
 function cdTick() {
   const c = ui.cd; if (!c) return;
@@ -875,12 +823,17 @@ document.addEventListener('click', e => {
     if (el) { el.scrollIntoView({ block:'center' }); el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 2500); }
   }
   else if (a === 'cd-test') beginCountdown(null, true);
+  else if (a === 'iv') {
+    state.event.interval = Math.max(1, Math.min(180, (+state.event.interval || 30) + +b.dataset.d));
+    ui.autoSkip = null; save(); const y = scrollY; render(); scrollTo(0, y);
+    toast(`${state.event.interval} min mellan starter`);
+  }
   else if (a === 'auto-pause') { state.event.autoPaused = !state.event.autoPaused; save(); render(); toast(state.event.autoPaused ? 'Automatiken pausad. Starta nästa manuellt.' : 'Automatiken är på igen'); }
   else if (a === 'go-test') {   // visa GOGO! utan att starta något
     ac();
     $('#cd-lbl').textContent = ''; $('#cd-sub').textContent = 'Test – ingen start'; $('#cd-ctl').hidden = true;
     const n = $('#cd-num'); n.textContent = 'GOGO!'; n.className = 'big'; void n.offsetWidth; n.className = 'big go';
-    $('#cd').querySelectorAll('.ring,.spark').forEach(r => r.remove()); $('#cd').classList.remove('hit'); $('#cd').hidden = false;
+    $('#cd').querySelectorAll('.ring,.rays').forEach(r => r.remove()); $('#cd').classList.remove('hit'); $('#cd').hidden = false;
     gogo(); ui.cd = { preview:true, goUntil: Date.now() + 3200 };
   }
   else if (a === 'add-ent') {
