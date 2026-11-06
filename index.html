@@ -41,6 +41,8 @@ button,input,select,textarea{font:inherit;color:inherit}
 .bar{display:flex;align-items:center;gap:14px;padding-block:12px;flex-wrap:wrap}
 .brand{display:flex;align-items:center;gap:12px;flex:1;min-width:0}
 .logo{width:44px;height:44px;border-radius:12px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-family:var(--font-display);font-weight:900;font-size:20px;flex:none}
+.plogo{height:44px;width:auto;flex:none}
+@media (max-width:560px){.plogo{height:32px}}
 .brand h1{margin:0;font-family:var(--font-display);font-weight:800;font-size:26px;line-height:1;text-transform:uppercase}
 .brand p{margin:2px 0 0;color:var(--muted);font-size:13px}
 .clock{font-family:var(--font-num);font-weight:700;font-size:34px;line-height:1;font-variant-numeric:tabular-nums}
@@ -178,7 +180,18 @@ textarea{resize:vertical;line-height:1.5;min-height:110px}
 #cd .ring{position:absolute;left:50%;top:50%;width:50vmin;height:50vmin;margin:-25vmin 0 0 -25vmin;border-radius:50%;border:1vmin solid var(--cdc);box-shadow:0 0 3vmin var(--cdc);pointer-events:none;animation:cdring 1.1s cubic-bezier(.15,.6,.3,1) forwards}
 @keyframes cdring{0%{transform:scale(.4);opacity:.6}100%{transform:scale(2.8);opacity:0}}
 #cd.c-blue{--cdc:#3ba7e6}#cd.c-orange{--cdc:#ff8a1f}#cd.c-green{--cdc:var(--go)}
-#cd>*:not(.ring):not(.rays){position:relative;z-index:1}
+#cd>*:not(.ring):not(.rays):not(.cd-abs){position:relative;z-index:1}
+#cd .cd-abs{position:absolute;z-index:2;left:0;right:0}
+#cd .cd-top{top:0;display:flex;align-items:center;gap:14px;padding:max(18px,env(safe-area-inset-top,0px)) max(24px,env(safe-area-inset-right,0px)) 0 max(24px,env(safe-area-inset-left,0px))}
+#cd .cd-top img{height:clamp(34px,6vmin,64px);width:auto}
+#cd .cd-top span{font-size:clamp(10px,1.5vmin,14px);font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);border-left:1px solid var(--line);padding-left:14px;max-width:16ch;line-height:1.35}
+#cd .cd-foot{bottom:0;display:grid;justify-items:center;gap:10px;padding:0 16px max(18px,env(safe-area-inset-bottom,0px))}
+#cd .cd-foot .t{font-size:clamp(10px,1.4vmin,13px);font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:var(--muted)}
+#cd .cd-foot .logos{display:flex;flex-wrap:wrap;justify-content:center;gap:clamp(8px,1.4vmin,14px)}
+#cd .cd-foot .logos span{display:flex;align-items:center;justify-content:center;box-sizing:border-box;height:clamp(40px,7.5vmin,72px);padding:clamp(4px,.8vmin,8px) clamp(8px,1.4vmin,14px);background:#fff;border-radius:10px;box-shadow:0 4px 18px rgba(0,0,0,.35)}
+#cd .cd-foot .logos img{display:block;height:100%;width:auto;max-width:clamp(80px,16vmin,170px);object-fit:contain}
+#cd .cd-foot .logos span.sq{padding:0;overflow:hidden}
+#cd .heatlbl{font-family:var(--font-display);font-weight:900;text-transform:uppercase;letter-spacing:.04em;line-height:1;font-size:clamp(40px,10vmin,120px);padding:.12em .55em;border-radius:.25em;color:#fff;background:color-mix(in srgb,var(--cdc) 28%,transparent);border:.06em solid var(--cdc);box-shadow:0 0 6vmin color-mix(in srgb,var(--cdc) 45%,transparent);margin-bottom:1vmin}
 /* GOGO! – en explosion utan blink: texten slår in, en ljuskägla av strålar och en tryckvåg, en gång. Färg 2 (--g2) väljs under Inställningar */
 #cd.gogo{--g2:#3ba7e6;background:radial-gradient(60% 60% at 50% 50%, color-mix(in srgb,var(--go) 38%,var(--ink)) 0%, color-mix(in srgb,var(--go) 12%,var(--ink)) 85%);animation:gopunch .5s cubic-bezier(.2,1,.3,1)}
 @keyframes gopunch{0%{transform:scale(1.04)}100%{transform:none}}
@@ -189,10 +202,10 @@ textarea{resize:vertical;line-height:1.5;min-height:110px}
 #cd .ring.wave{border-width:2.4vmin;animation:cdwave 1s cubic-bezier(.05,.7,.25,1) forwards}
 @keyframes cdwave{0%{transform:scale(.3);opacity:.9}100%{transform:scale(4.2);opacity:0}}
 #cd .ring.g2{border-color:var(--g2);box-shadow:0 0 4vmin var(--g2),inset 0 0 4vmin var(--g2)}
-#cd .big.go{font-size:min(44vh,33vw);letter-spacing:.01em;color:var(--gt,#fff);-webkit-text-stroke:.5vmin #04140b;text-shadow:0 0 3vmin var(--g2),0 0 10vmin var(--go);animation:goslam .5s cubic-bezier(.15,1.15,.35,1) forwards}
+#cd .big.go{font-size:min(38vh,30vw);letter-spacing:.01em;color:var(--gt,#fff);-webkit-text-stroke:.5vmin #04140b;text-shadow:0 0 3vmin var(--g2),0 0 10vmin var(--go);animation:goslam .5s cubic-bezier(.15,1.15,.35,1) forwards}
 @keyframes goslam{0%{transform:scale(3.4);opacity:0;filter:blur(2.5vmin)}60%{opacity:1;filter:blur(0)}100%{transform:none;opacity:1;filter:none}}
-#cd .lbl{font-weight:700;letter-spacing:.3em;text-transform:uppercase;font-size:clamp(20px,4vw,40px);padding-left:.3em}
-#cd .big{font-family:var(--font-display);font-weight:900;line-height:.85;font-size:min(60vh,55vw);font-variant-numeric:tabular-nums;color:#fff;-webkit-text-stroke:.5vmin var(--cdc);text-shadow:0 0 2vmin var(--cdc),0 0 8vmin var(--cdc)}
+#cd .lbl{font-weight:700;letter-spacing:.3em;text-transform:uppercase;font-size:clamp(16px,3vmin,32px);padding-left:.3em;color:var(--muted)}
+#cd .big{font-family:var(--font-display);font-weight:900;line-height:.85;font-size:min(46vh,50vw);font-variant-numeric:tabular-nums;color:#fff;-webkit-text-stroke:.5vmin var(--cdc);text-shadow:0 0 2vmin var(--cdc),0 0 8vmin var(--cdc)}
 #cd .sub{font-weight:700;letter-spacing:.12em;text-transform:uppercase;font-size:clamp(16px,2.6vw,28px);color:var(--muted)}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--text);color:var(--ink);padding:12px 20px;border-radius:999px;font-weight:700;z-index:120;max-width:calc(100% - 32px);text-align:center}
 @media (prefers-reduced-motion:reduce){.tile{transition:none}#cd.flash .big,#cd .big.go,#cd .ring,#cd .rays,#cd.gogo{animation:none}#cd.flash::before{animation:none}#cd.gogo::before{animation:none;opacity:.3}}
@@ -204,7 +217,7 @@ textarea{resize:vertical;line-height:1.5;min-height:110px}
   <div class="wrap">
     <div class="bar">
       <div class="brand">
-        <div class="logo">P</div>
+        <img class="plogo" src="assets/pace.png" alt="PACE Performance &amp; Training" width="476" height="212">
         <div style="min-width:0">
           <h1 id="ev-name">HYROX Simulation</h1>
           <p id="ev-sub">Tidtagning</p>
@@ -218,12 +231,15 @@ textarea{resize:vertical;line-height:1.5;min-height:110px}
 <main class="wrap" id="main"></main>
 
 <div id="cd" hidden>
+  <div class="cd-abs cd-top"><img src="assets/pace.png" alt="PACE Performance &amp; Training"><span>Official HYROX Training Club</span></div>
+  <div class="heatlbl" id="cd-heat">Heat 1</div>
   <div class="lbl" id="cd-lbl">Startar om</div>
   <div class="big" id="cd-num">10</div>
   <div class="sub" id="cd-sub"></div>
   <div class="row" id="cd-ctl" style="justify-content:center;margin-top:16px">
     <button class="btn ghost" type="button" data-act="cd-cancel">Avbryt nedräkning</button>
   </div>
+  <div class="cd-abs cd-foot" id="cd-spons"></div>
 </div>
 <div class="toast" id="toast" hidden></div>
 
@@ -254,8 +270,8 @@ const SEED = [
 ];
 const seed = () => ({
   v: 1,
-  event: { name:'HYROX Simulation', date:'2026-11-07', interval:30, countdown:10, sound:true, goColor:'blue', auto:true, autoPaused:false },
-  heats: SEED.map(([time, rows], i) => ({ id:uid(), title:`Start ${i+1}`, time, lanes:rows.join('\n'), startedAt:null })),
+  event: { name:'HYROX Simulation', date:'2026-11-07', interval:30, countdown:10, sound:true, goColor:'blue', sponsors:true, auto:true, autoPaused:false },
+  heats: SEED.map(([time, rows], i) => ({ id:uid(), title:`Heat ${i+1}`, time, lanes:rows.join('\n'), startedAt:null })),
   res: {},   // nyckel: startnummer -> { fin: tidsstämpel ms, dnf: bool }
 });
 
@@ -265,6 +281,7 @@ function load() {
   if (!state || !state.heats) state = seed();
   state.event = Object.assign(seed().event, state.event);
   state.res = state.res || {};
+  for (const h of state.heats) h.title = String(h.title || '').replace(/^Start (\d+)$/, 'Heat $1');   // gamla namn
 }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { toast('Kunde inte spara – kontrollera att privat surfning är av'); } }
 
@@ -521,6 +538,7 @@ const V = {
       </div>
       <label class="chk"><input id="f-auto" type="checkbox" data-path="event.auto"${ev.auto ? ' checked' : ''}> Automatiska starter: när första starten har gått rullar nästa igång automatiskt efter föregående</label>
       <div class="row"><span class="eyebrow">Minuter mellan starter</span>${ivStepper()}</div>
+      <label class="chk"><input id="f-spons" type="checkbox" data-path="event.sponsors"${ev.sponsors ? ' checked' : ''}> Visa sponsorer längst ner i nedräkningen</label>
       <label class="chk"><input id="f-sound" type="checkbox" data-path="event.sound"${ev.sound ? ' checked' : ''}> Ljud under nedräkningen: trumslag varje sekund och mässingsstötar på 3-2-1 (GOGO! är tyst)</label>
       <div class="grid">
         <label class="f">Färg ihop med grönt på GOGO!<select id="f-gocolor" data-path="event.goColor" style="width:100%;background:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-height:46px;font-size:16px;color:var(--text)">
@@ -621,7 +639,8 @@ function beginCountdown(id, preview, target) {
   const h = preview ? { title:'Test – ingen start' } : state.heats.find(x => x.id === id); if (!h) return;
   ac();
   ui.cd = { id, target: target || Date.now() + (+state.event.countdown || 10) * 1000, last:null, goUntil:null, auto: !!target };
-  $('#cd-sub').textContent = preview ? h.title : `${h.title} · ${entriesOf(h).map(e => e.nr).join(', ')}`;
+  $('#cd-heat').textContent = preview ? 'Test' : h.title; $('#cd-sub').textContent = preview ? 'Ingen start registreras' : '';
+  renderSponsors();
   if (preview) ui.cd.preview = true;
   $('#cd-ctl').hidden = false; $('#cd').classList.remove('gogo'); $('#cd').querySelectorAll('.ring,.rays').forEach(r => r.remove()); $('#cd').classList.remove('hit'); $('#cd').hidden = false; tick();
 }
@@ -639,6 +658,19 @@ function ring(delay, cls) {
     r.addEventListener('animationend', () => r.remove());
     $('#cd').appendChild(r);
   }, delay);
+}
+const SPONSORS = [
+  { name:'Björn Borg', src:'assets/bjornborg.jpg' },
+  { name:'Kraftmark', src:'assets/kraftmark.jpg' },
+  { name:'Ramudden', src:'assets/ramudden.jpg' },
+  { name:'NOCCO', src:'assets/nocco.jpg', sq:true },
+  { name:'Toveks Bil', src:'assets/toveks.jpg' },
+  { name:'Hajen Lågpris', src:'assets/hajen.jpg' },
+];
+function renderSponsors() {
+  const el = $('#cd-spons');
+  el.hidden = !state.event.sponsors;
+  el.innerHTML = `<div class="t">Tack till våra sponsorer</div><div class="logos">${SPONSORS.map(x => `<span class="${x.sq ? 'sq' : ''}"><img src="${x.src}" alt="${esc(x.name)}"></span>`).join('')}</div>`;
 }
 const GOCOL = {
   blue:  { label:'PACE-blå (rekommenderad)', g2:'#3ba7e6', text:'#ffffff' },
@@ -673,7 +705,7 @@ function cdTick() {
     }
   } else {
     if (!c.preview) startHeat(c.id, c.target);           // exakt tidpunkt när nedräkningen nådde 0
-    $('#cd-lbl').textContent = ''; num.textContent = 'GOGO!'; num.className = 'big go'; $('#cd-ctl').hidden = true; $('#cd-sub').textContent = '';
+    $('#cd-lbl').textContent = ''; num.textContent = 'GOGO!'; num.className = 'big go'; $('#cd-ctl').hidden = true;
     gogo(); c.goUntil = now + 3200;
   }
 }
@@ -831,7 +863,7 @@ document.addEventListener('click', e => {
   else if (a === 'auto-pause') { state.event.autoPaused = !state.event.autoPaused; save(); render(); toast(state.event.autoPaused ? 'Automatiken pausad. Starta nästa manuellt.' : 'Automatiken är på igen'); }
   else if (a === 'go-test') {   // visa GOGO! utan att starta något
     ac();
-    $('#cd-lbl').textContent = ''; $('#cd-sub').textContent = 'Test – ingen start'; $('#cd-ctl').hidden = true;
+    $('#cd-lbl').textContent = ''; $('#cd-heat').textContent = 'Test'; $('#cd-sub').textContent = 'Ingen start registreras'; $('#cd-ctl').hidden = true; renderSponsors();
     const n = $('#cd-num'); n.textContent = 'GOGO!'; n.className = 'big'; void n.offsetWidth; n.className = 'big go';
     $('#cd').querySelectorAll('.ring,.rays').forEach(r => r.remove()); $('#cd').classList.remove('hit'); $('#cd').hidden = false;
     gogo(); ui.cd = { preview:true, goUntil: Date.now() + 3200 };
@@ -876,7 +908,7 @@ document.addEventListener('click', e => {
   }
   else if (a === 'add-heat') {
     const last = state.heats[state.heats.length - 1], m = toMin(last?.time);
-    state.heats.push({ id:uid(), title:`Start ${state.heats.length + 1}`, time: m != null ? minTxt(m + (+state.event.interval || 30)) : '08:30', lanes:'', startedAt:null });
+    state.heats.push({ id:uid(), title:`Heat ${state.heats.length + 1}`, time: m != null ? minTxt(m + (+state.event.interval || 30)) : '08:30', lanes:'', startedAt:null });
     save(); render();
   }
   else if (a === 'del-heat') {

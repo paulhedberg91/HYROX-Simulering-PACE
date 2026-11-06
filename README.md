@@ -20,6 +20,11 @@ En webbapp för iPad, i en enda fil (`index.html`). Ingen installation och inga 
 - Ändrar du ett startnummer följer en eventuell tid med.
 - **Faktisk start** fylls i automatiskt. Om ni glömde trycka på start kan du skriva in rätt klockslag där i efterhand, så räknas alla tider om.
 
+## Logga och sponsorer
+- PACE-loggan syns uppe till vänster i appen och i nedräkningen, tillsammans med *Official HYROX Training Club*.
+- Nedräkningen visar vilket heat som startar, till exempel **HEAT 2**, som en stor rubrik ovanför siffran.
+- Sponsorerna (Björn Borg, Kraftmark, Ramudden, NOCCO, Toveks Bil och Hajen Lågpris) visas som vita brickor längst ner i nedräkningen och under GOGO!. Det kan stängas av under Inställningar. Loggorna ligger i mappen `assets/`.
+
 ## Viktigt
 - Allt sparas automatiskt på iPaden (`localStorage`). **Använd inte privat surfning.**
 - Ta en **backup** under *Inställningar* ett par gånger under dagen. *Exportera resultat (CSV)* går att öppna i Excel eller Numbers.
