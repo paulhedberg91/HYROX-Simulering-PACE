@@ -14,7 +14,7 @@ En webbapp för iPad, i en enda fil (`index.html`). Ingen installation och inga 
 8. **Starta om (felstart eller test):** varje start har knappen **↺ Starta om**, både när den pågår, när den är klar och under Startlista. Längst ner under Tidtagning, och under Inställningar, finns **↺ Starta om allt**. Den nollställer alla starter och tider men behåller startlistan.
 
 ## Startlista
-- Uppdaterad startlista 7 nov: 14 heat, 08:30–14:30. Normalt 30 min mellan heaten, plus ett extra heat 12:45 (nr 50). Philip Ahl (nr 1) kommer inte och är borttagen. När en ny version av startlistan läggs ut ersätter appen den gamla automatiskt och rensar testtider; inställningarna behålls.
+- Uppdaterad startlista 7 nov: 14 heat, 08:30–14:30, startnummer 1–51 i startordning (Olof Oljelund är nr 1). Normalt 30 min mellan heaten, plus ett extra heat 12:45 (nr 36). Philip Ahl kommer inte och är borttagen. När en ny version av startlistan läggs ut ersätter appen den gamla automatiskt och rensar testtider; inställningarna behålls.
 - Under **Startlista** har varje startande en egen rad med fälten Nr, Klass, Deltagare 1 och Deltagare 2. Skriv om namn direkt i fälten, så sparas de automatiskt. `XXX` visas som *Partner TBA*.
 - **Flytta till…** flyttar en startande till en annan start. Med **+ Lägg till startande** lägger du till fler, och med ✕ tar du bort (efter en bekräftelse). Den som redan har en sluttid kan inte flyttas innan målgången har ångrats.
 - Ändrar du ett startnummer följer en eventuell tid med.

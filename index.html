@@ -253,22 +253,22 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt
 const $ = s => document.querySelector(s);
 
 /* ---------- Startlista HYROX Simulation 7 nov 2026 ---------- */
-const SEED_VERSION = 2;   // uppdaterad startlista 7 nov (Philip Ahl kommer ej, extra heat 12:45)
+const SEED_VERSION = 3;   // startlista 7 nov, omnumrerad 1–51 i startordning (Philip Ahl kommer ej, extra heat 12:45)
 const SEED = [
- ['08:30',['2 | Single Herr | Olof Oljelund','3 | Single Herr | Oscar Isaksson','4 | Single Herr | Fredrik Andersson']],
- ['09:00',['5 | Doubles Herr | Michael Nilsson | Martin Kristensson','6 | Doubles Herr | Joakim Petersson | Kristoffer Karlsson','7 | Doubles Herr PRO | Max Quiroga | Marcus Kärrstrand','8 | Doubles Herr PRO | Salim Abdulahad | Joakim Nyman']],
- ['09:30',['9 | Doubles Herr | Viktor Tuvenäs | Anton Johansson','10 | Doubles Herr | Johann Kaiser | Björn Karlsson','11 | Doubles Herr | Ola Nilsson | Anton Kristensson','12 | Doubles Herr | Goran Edenro | Krister Syrten']],
- ['10:00',['13 | Single Dam | Emma Larsson','14 | Single Dam | Jessica Andersson','15 | Single Dam | Anne Edenro','16 | Doubles Dam | Malin Kaiser | Charlotte Karlsson']],
- ['10:30',['17 | Doubles Dam | Josefine Rosander | Amanda Svensson','18 | Doubles Dam | Caroline Öhagen | Maja Werlid','19 | Doubles Dam | Linn Hultfeldt | Jennie Javette','20 | Doubles Dam | Linnéa Andersson | Alice Klinteby']],
- ['11:00',['21 | Doubles Dam | Sandra Skattberg | Kajsa Karlsson','22 | Doubles Dam | Ebba Berndtsson | Amanda Nagy','23 | Doubles Dam | Line Nygård | Ida Möller','24 | Doubles Dam | Susanne Hedberg | Anneli Olsson']],
- ['11:30',['25 | Doubles Dam | Josefin Nygren | Anna Lindqvist','26 | Doubles Dam | Nadia Andersson | Linn Sidahl','27 | Doubles Mixed | Erik Kovacs | Emma Kovacs','28 | Doubles Dam | Caroline Kassell | Kristina Altner']],
- ['12:00',['29 | Doubles Dam | Ella Daneshmand | Evelina Montgomery','30 | Doubles Dam | Lina Andersson | Josefine Eklund','31 | Doubles Dam | Helen Lindén | Thea Grangéus','32 | Doubles Dam | Ellen Rundbäck | Stina Rehnqvist']],
- ['12:30',['33 | Doubles Dam | Emma Rignell | Amanda Hansson','34 | Doubles Dam | Johanna Lindberg | Åsa Cederlöf','35 | Doubles Mixed | Linda Thernell | Jonas Öjvik','36 | Single Dam | Lina Oliw']],
- ['12:45',['50 | Doubles Mixed | Marlene Nilsson | Thomas Erixon']],
+ ['08:30',['1 | Single Herr | Olof Oljelund','2 | Single Herr | Oscar Isaksson','3 | Single Herr | Fredrik Andersson']],
+ ['09:00',['4 | Doubles Herr | Michael Nilsson | Martin Kristensson','5 | Doubles Herr | Joakim Petersson | Kristoffer Karlsson','6 | Doubles Herr PRO | Max Quiroga | Marcus Kärrstrand','7 | Doubles Herr PRO | Salim Abdulahad | Joakim Nyman']],
+ ['09:30',['8 | Doubles Herr | Viktor Tuvenäs | Anton Johansson','9 | Doubles Herr | Johann Kaiser | Björn Karlsson','10 | Doubles Herr | Ola Nilsson | Anton Kristensson','11 | Doubles Herr | Goran Edenro | Krister Syrten']],
+ ['10:00',['12 | Single Dam | Emma Larsson','13 | Single Dam | Jessica Andersson','14 | Single Dam | Anne Edenro','15 | Doubles Dam | Malin Kaiser | Charlotte Karlsson']],
+ ['10:30',['16 | Doubles Dam | Josefine Rosander | Amanda Svensson','17 | Doubles Dam | Caroline Öhagen | Maja Werlid','18 | Doubles Dam | Linn Hultfeldt | Jennie Javette','19 | Doubles Dam | Linnéa Andersson | Alice Klinteby']],
+ ['11:00',['20 | Doubles Dam | Sandra Skattberg | Kajsa Karlsson','21 | Doubles Dam | Ebba Berndtsson | Amanda Nagy','22 | Doubles Dam | Line Nygård | Ida Möller','23 | Doubles Dam | Susanne Hedberg | Anneli Olsson']],
+ ['11:30',['24 | Doubles Dam | Josefin Nygren | Anna Lindqvist','25 | Doubles Dam | Nadia Andersson | Linn Sidahl','26 | Doubles Mixed | Erik Kovacs | Emma Kovacs','27 | Doubles Dam | Caroline Kassell | Kristina Altner']],
+ ['12:00',['28 | Doubles Dam | Ella Daneshmand | Evelina Montgomery','29 | Doubles Dam | Lina Andersson | Josefine Eklund','30 | Doubles Dam | Helen Lindén | Thea Grangéus','31 | Doubles Dam | Ellen Rundbäck | Stina Rehnqvist']],
+ ['12:30',['32 | Doubles Dam | Emma Rignell | Amanda Hansson','33 | Doubles Dam | Johanna Lindberg | Åsa Cederlöf','34 | Doubles Mixed | Linda Thernell | Jonas Öjvik','35 | Single Dam | Lina Oliw']],
+ ['12:45',['36 | Doubles Mixed | Marlene Nilsson | Thomas Erixon']],
  ['13:00',['37 | Single Herr | Kristian Gustavasson','38 | Doubles Mixed | Mattias Olsson | Anna-Maria Olsson','39 | Doubles Mixed | Robin Demén | Emilia Demén','40 | Doubles Herr | Mattias Helde | Mathias Hilding Borg']],
  ['13:30',['41 | Doubles Mixed | Jacob Medes | Charlotte Holmquist','42 | Doubles Mixed | Ida axelsson | Magnus Axelsson','43 | Doubles Mixed | Patricia Ynner | Robin Johansson','44 | Doubles Mixed | Sandra Lundahl | Sebastian Josefsson']],
  ['14:00',['45 | Doubles Mixed | Sofia Torstensson | Nicholas Johansson','46 | Doubles Mixed | Hampus von Platen | Jenny von Platen','47 | Doubles Mixed | William Wallsin | Rebecka Mikkonen','48 | Doubles Mixed | Anh Tran | Nina Wedel']],
- ['14:30',['49 | Doubles Mixed | Christer Sandberg | Nora Sandberg','51 | Doubles Mixed | Andreas Söderström | Gisela Söderström','52 | Single Herr | Anders Lövdahl']],
+ ['14:30',['49 | Doubles Mixed | Christer Sandberg | Nora Sandberg','50 | Doubles Mixed | Andreas Söderström | Gisela Söderström','51 | Single Herr | Anders Lövdahl']],
 ];
 const seed = () => ({
   v: 1, seedVersion: SEED_VERSION,
@@ -970,7 +970,7 @@ document.addEventListener('pointerdown', () => ac());   // låser upp ljudet så
 window.addEventListener('beforeunload', e => { if (state.heats.some(h => heatStatus(h) === 'run')) { e.preventDefault(); e.returnValue = ''; } });
 
 load(); render();
-if (ui.newList) toast('Ny startlista inläst (7 nov). Tidigare testtider är rensade.');
+if (ui.newList) toast('Ny startlista inläst (7 nov, nr 1–51). Tidigare testtider är rensade.');
 if ('serviceWorker' in navigator && location.protocol === 'https:' && !/claude|anthropic/.test(location.hostname)) navigator.serviceWorker.register('sw.js').catch(() => {});
 })();
 </script>
