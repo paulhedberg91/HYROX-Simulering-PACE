@@ -253,23 +253,25 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt
 const $ = s => document.querySelector(s);
 
 /* ---------- Startlista HYROX Simulation 7 nov 2026 ---------- */
+const SEED_VERSION = 2;   // uppdaterad startlista 7 nov (Philip Ahl kommer ej, extra heat 12:45)
 const SEED = [
- ['08:30',['1 | Single Herr | Philip Ahl','2 | Single Herr | Anders Lövdahl','3 | Single Herr | Oscar Isaksson','4 | Single Herr | Fredrik Andersson']],
+ ['08:30',['2 | Single Herr | Olof Oljelund','3 | Single Herr | Oscar Isaksson','4 | Single Herr | Fredrik Andersson']],
  ['09:00',['5 | Doubles Herr | Michael Nilsson | Martin Kristensson','6 | Doubles Herr | Joakim Petersson | Kristoffer Karlsson','7 | Doubles Herr PRO | Max Quiroga | Marcus Kärrstrand','8 | Doubles Herr PRO | Salim Abdulahad | Joakim Nyman']],
- ['09:30',['9 | Doubles Herr | Viktor Tuvenäs | XXX','10 | Doubles Herr | Johann Kaiser | Björn Karlsson','11 | Doubles Herr | Ingvar Johansson | Anton Kristensson','12 | Doubles Herr | Goran Edenro | Krister Syrten']],
- ['10:00',['13 | Single Dam | Emma Larsson','14 | Single Dam | Jessica Carlsson','15 | Single Dam | Anne Edenro','16 | Doubles Dam | Malin Kaiser | Charlotte Karlsson']],
- ['10:30',['17 | Doubles Dam | Josefine Rosander | Amanda Svensson','18 | Doubles Dam | Caroline Öhagen | XXX','19 | Doubles Dam | Linn Hultfeldt | Jennie Javette','20 | Doubles Dam | Linnéa Andersson | Alice Klinteby']],
+ ['09:30',['9 | Doubles Herr | Viktor Tuvenäs | Anton Johansson','10 | Doubles Herr | Johann Kaiser | Björn Karlsson','11 | Doubles Herr | Ola Nilsson | Anton Kristensson','12 | Doubles Herr | Goran Edenro | Krister Syrten']],
+ ['10:00',['13 | Single Dam | Emma Larsson','14 | Single Dam | Jessica Andersson','15 | Single Dam | Anne Edenro','16 | Doubles Dam | Malin Kaiser | Charlotte Karlsson']],
+ ['10:30',['17 | Doubles Dam | Josefine Rosander | Amanda Svensson','18 | Doubles Dam | Caroline Öhagen | Maja Werlid','19 | Doubles Dam | Linn Hultfeldt | Jennie Javette','20 | Doubles Dam | Linnéa Andersson | Alice Klinteby']],
  ['11:00',['21 | Doubles Dam | Sandra Skattberg | Kajsa Karlsson','22 | Doubles Dam | Ebba Berndtsson | Amanda Nagy','23 | Doubles Dam | Line Nygård | Ida Möller','24 | Doubles Dam | Susanne Hedberg | Anneli Olsson']],
- ['11:30',['25 | Doubles Dam | Josefin Nygren | Anna Lindqvist','26 | Doubles Dam | Nadia Andersson | Linn Sidahl','27 | Doubles Dam | Elin Wadell | XXX','28 | Doubles Dam | Caroline Kassell | XXX']],
- ['12:00',['29 | Doubles Dam | Ella Daneshmand | Evelina Montgomery','30 | Doubles Dam | Lina Andersson | XXX','31 | Doubles Dam | Helen Lindén | XXX','32 | Doubles Dam | Ellen Rundbäck | Stina Rehnqvist']],
- ['12:30',['33 | Doubles Dam | Emma Rignell | Amanda Hansson','34 | Doubles Dam | Johanna Lindberg | XXX','35 | Doubles Mixed | Linda Thernell | Jonas Öjvik','36 | Doubles Mixed | Lina Oliw | Mikael Oliw']],
- ['13:00',['37 | Doubles Mixed | Kristian Gustavasson | Rebecka Borglund','38 | Doubles Mixed | Mattias Olsson | Anna-Maria Olsson','39 | Doubles Mixed | Robin Demén | XXX','40 | Doubles Herr | Mattias Helde | Mathias Hilding Borg']],
+ ['11:30',['25 | Doubles Dam | Josefin Nygren | Anna Lindqvist','26 | Doubles Dam | Nadia Andersson | Linn Sidahl','27 | Doubles Mixed | Erik Kovacs | Emma Kovacs','28 | Doubles Dam | Caroline Kassell | Kristina Altner']],
+ ['12:00',['29 | Doubles Dam | Ella Daneshmand | Evelina Montgomery','30 | Doubles Dam | Lina Andersson | Josefine Eklund','31 | Doubles Dam | Helen Lindén | Thea Grangéus','32 | Doubles Dam | Ellen Rundbäck | Stina Rehnqvist']],
+ ['12:30',['33 | Doubles Dam | Emma Rignell | Amanda Hansson','34 | Doubles Dam | Johanna Lindberg | Åsa Cederlöf','35 | Doubles Mixed | Linda Thernell | Jonas Öjvik','36 | Single Dam | Lina Oliw']],
+ ['12:45',['50 | Doubles Mixed | Marlene Nilsson | Thomas Erixon']],
+ ['13:00',['37 | Single Herr | Kristian Gustavasson','38 | Doubles Mixed | Mattias Olsson | Anna-Maria Olsson','39 | Doubles Mixed | Robin Demén | Emilia Demén','40 | Doubles Herr | Mattias Helde | Mathias Hilding Borg']],
  ['13:30',['41 | Doubles Mixed | Jacob Medes | Charlotte Holmquist','42 | Doubles Mixed | Ida axelsson | Magnus Axelsson','43 | Doubles Mixed | Patricia Ynner | Robin Johansson','44 | Doubles Mixed | Sandra Lundahl | Sebastian Josefsson']],
- ['14:00',['45 | Doubles Mixed | Sofia Torstensson | Nicholas Johansson','46 | Doubles Mixed | Hampus von Platen | Jenny von Platen','47 | Doubles Mixed | William Wallsin | Rebecka Mikkonen','48 | Doubles Mixed | Anh Tran | Nina Tran']],
- ['14:30',['49 | Doubles Mixed | Christer Sandberg | XXX','50 | Doubles Mixed | Marlene Nilsson | Thomas Erixon','51 | Doubles Mixed | Andreas Söderström | Gisela Söderström','52 | Single Herr | Olof Oljelund']],
+ ['14:00',['45 | Doubles Mixed | Sofia Torstensson | Nicholas Johansson','46 | Doubles Mixed | Hampus von Platen | Jenny von Platen','47 | Doubles Mixed | William Wallsin | Rebecka Mikkonen','48 | Doubles Mixed | Anh Tran | Nina Wedel']],
+ ['14:30',['49 | Doubles Mixed | Christer Sandberg | Nora Sandberg','51 | Doubles Mixed | Andreas Söderström | Gisela Söderström','52 | Single Herr | Anders Lövdahl']],
 ];
 const seed = () => ({
-  v: 1,
+  v: 1, seedVersion: SEED_VERSION,
   event: { name:'HYROX Simulation', date:'2026-11-07', interval:30, countdown:10, sound:true, goColor:'blue', sponsors:true, auto:true, autoPaused:false },
   heats: SEED.map(([time, rows], i) => ({ id:uid(), title:`Heat ${i+1}`, time, lanes:rows.join('\n'), startedAt:null })),
   res: {},   // nyckel: startnummer -> { fin: tidsstämpel ms, dnf: bool }
@@ -282,6 +284,11 @@ function load() {
   state.event = Object.assign(seed().event, state.event);
   state.res = state.res || {};
   for (const h of state.heats) h.title = String(h.title || '').replace(/^Start (\d+)$/, 'Heat $1');   // gamla namn
+  if (state.seedVersion !== SEED_VERSION) {   // ny startlista: ersätt heat och testtider, behåll inställningar
+    const ev = state.event; state = seed(); state.event = ev; state.event.autoSkip = null; state.event.autoPaused = false; state.event.interval = 30;
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+    ui.newList = true;
+  }
 }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { toast('Kunde inte spara – kontrollera att privat surfning är av'); } }
 
@@ -316,12 +323,15 @@ function heatStatus(h) {
 // Automatiska starter: varje start rullar igång X min efter att föregående start gick (kedja)
 function dueMap() {
   const m = new Map(); if (!state.event.auto) return m;
-  const iv = (+state.event.interval || 30) * 60000;
-  let last = null;
+  // Följer startlistans tider: avståndet mellan heaten (30 min, 15 min …) räknas från föregående faktiska start
+  const iv = +state.event.interval || 30;
+  let last = null, lastPlan = null;
   for (const h of state.heats) {
-    if (h.startedAt) { last = h.startedAt; continue; }
+    const pm = toMin(h.time);
+    if (h.startedAt) { last = h.startedAt; lastPlan = pm; continue; }
     if (last == null) continue;
-    const due = last + iv; m.set(h.id, { due, from: last }); last = due;
+    const gap = pm != null && lastPlan != null && pm > lastPlan ? pm - lastPlan : iv;
+    const due = last + gap * 60000; m.set(h.id, { due, from: last }); last = due; lastPlan = pm != null ? pm : (lastPlan != null ? lastPlan + gap : null);
   }
   return m;
 }
@@ -331,10 +341,10 @@ const plannedSpan = () => {
   const a = Math.min(...ms), b = Math.max(...ms) + (+state.event.interval || 30);
   return { a, b, ms:(b - a) * 60000 };
 };
-const ivStepper = () => `<span class="ivs" role="group" aria-label="Minuter mellan starter">
-  <button class="btn sm" type="button" data-act="iv" data-d="-5" aria-label="5 minuter kortare">−5</button><button class="btn sm" type="button" data-act="iv" data-d="-1" aria-label="1 minut kortare">−1</button>
-  <b>${+state.event.interval || 30} min</b>
-  <button class="btn sm" type="button" data-act="iv" data-d="1" aria-label="1 minut längre">+1</button><button class="btn sm" type="button" data-act="iv" data-d="5" aria-label="5 minuter längre">+5</button></span>`;
+const ivStepper = () => { const nx = state.heats.find(h => !h.startedAt); return `<span class="ivs" role="group" aria-label="Flytta kommande heat">
+  <button class="btn sm" type="button" data-act="iv" data-d="-5" aria-label="5 minuter tidigare">−5</button><button class="btn sm" type="button" data-act="iv" data-d="-1" aria-label="1 minut tidigare">−1</button>
+  <b>${nx ? esc(nx.time) : '–'}</b>
+  <button class="btn sm" type="button" data-act="iv" data-d="1" aria-label="1 minut senare">+1</button><button class="btn sm" type="button" data-act="iv" data-d="5" aria-label="5 minuter senare">+5</button></span>`; };
 const minTxt = m => `${pad(Math.floor(m / 60) % 24)}:${pad(m % 60)}`;
 
 /* ---------- Ljud ---------- */
@@ -423,7 +433,7 @@ const V = {
     let html = '', autoHtml = '';
     if (state.event.auto && waiting.length) {
       const p = state.event.autoPaused, begun = state.heats.some(h => h.startedAt);
-      autoHtml = `<div class="autobar ${p ? 'paused' : ''}"><div><span class="dot"></span><b>Automatiska starter ${p ? 'pausade' : 'PÅ'}</b> <span class="muted">· ${begun ? 'nästa start rullar igång' : 'när första starten har gått rullar nästa igång'} så här många minuter efter föregående</span></div>
+      autoHtml = `<div class="autobar ${p ? 'paused' : ''}"><div><span class="dot"></span><b>Automatiska starter ${p ? 'pausade' : 'PÅ'}</b> <span class="muted">· följer startlistans tider${begun ? ', räknat från föregående faktiska start' : ' när första heatet har gått'}. Flytta kommande heat:</span></div>
         <div class="acts2">${ivStepper()}${begun ? `<button class="btn sm" type="button" data-act="auto-pause">${p ? '▶ Fortsätt automatik' : '❚❚ Pausa automatik'}</button>` : ''}</div></div>`;
     }
     if (state.heats.some(h => h.startedAt && !sameDay(h.startedAt, Date.now()))) {
@@ -540,8 +550,8 @@ const V = {
         <label class="f">Datum<input id="f-date" type="date" data-path="event.date" value="${esc(ev.date)}"></label>
         <label class="f">Nedräkning (sekunder)<input id="f-cd" type="number" inputmode="numeric" min="3" max="120" data-path="event.countdown" value="${esc(ev.countdown)}"></label>
       </div>
-      <label class="chk"><input id="f-auto" type="checkbox" data-path="event.auto"${ev.auto ? ' checked' : ''}> Automatiska starter: när första starten har gått rullar nästa igång automatiskt efter föregående</label>
-      <div class="row"><span class="eyebrow">Minuter mellan starter</span>${ivStepper()}</div>
+      <label class="chk"><input id="f-auto" type="checkbox" data-path="event.auto"${ev.auto ? ' checked' : ''}> Automatiska starter: när första heatet har gått startar resten enligt startlistans tider (08:30, 09:00 … 12:45, 13:00 …)</label>
+      <div class="row"><span class="eyebrow">Flytta alla kommande heat (nästa heat visas i mitten)</span>${ivStepper()}</div>
       <label class="chk"><input id="f-spons" type="checkbox" data-path="event.sponsors"${ev.sponsors ? ' checked' : ''}> Visa sponsorer längst ner i nedräkningen</label>
       <label class="chk"><input id="f-sound" type="checkbox" data-path="event.sound"${ev.sound ? ' checked' : ''}> Ljud under nedräkningen: trumslag varje sekund och mässingsstötar på 3-2-1 (GOGO! är tyst)</label>
       <div class="grid">
@@ -873,9 +883,12 @@ document.addEventListener('click', e => {
   }
   else if (a === 'cd-test') beginCountdown(null, true);
   else if (a === 'iv') {
-    state.event.interval = Math.max(1, Math.min(180, (+state.event.interval || 30) + +b.dataset.d));
+    // flytta alla kommande heat lika mycket – avstånden mellan dem behålls
+    const d = +b.dataset.d, up = state.heats.filter(h => !h.startedAt && toMin(h.time) != null);
+    if (!up.length) return;
+    up.forEach(h => h.time = minTxt(Math.max(0, toMin(h.time) + d)));
     state.event.autoSkip = null; save(); const y = scrollY; render(); scrollTo(0, y);
-    toast(`${state.event.interval} min mellan starter`);
+    toast(`Kommande heat flyttade ${d > 0 ? '+' : ''}${d} min · nästa ${up[0].title} kl ${up[0].time}`);
   }
   else if (a === 'auto-pause') { state.event.autoPaused = !state.event.autoPaused; save(); render(); toast(state.event.autoPaused ? 'Automatiken pausad. Starta nästa manuellt.' : 'Automatiken är på igen'); }
   else if (a === 'go-test') {   // visa GOGO! utan att starta något
@@ -957,6 +970,7 @@ document.addEventListener('pointerdown', () => ac());   // låser upp ljudet så
 window.addEventListener('beforeunload', e => { if (state.heats.some(h => heatStatus(h) === 'run')) { e.preventDefault(); e.returnValue = ''; } });
 
 load(); render();
+if (ui.newList) toast('Ny startlista inläst (7 nov). Tidigare testtider är rensade.');
 if ('serviceWorker' in navigator && location.protocol === 'https:' && !/claude|anthropic/.test(location.hostname)) navigator.serviceWorker.register('sw.js').catch(() => {});
 })();
 </script>
