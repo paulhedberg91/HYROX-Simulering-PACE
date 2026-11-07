@@ -26,6 +26,11 @@ En webbapp för iPad, i en enda fil (`index.html`). Ingen installation och inga 
 - Sponsorerna (Björn Borg, Kraftmark, Ramudden, NOCCO, Toveks Bil och Hajen Lågpris) visas som vita brickor längst ner i nedräkningen och under GOGO!. Det kan stängas av under Inställningar.
 - **Sponsorvisning i helskärm:** var 48:e sekund visas alla sponsorer i 8 sekunder under Tidtagning. Den väntar om någon har rört skärmen, om en ruta eller ett fält är aktivt, eller om en start är nära, och den stängs direkt om man trycker på skärmen. Stäng av eller testa under Inställningar. Loggorna ligger i mappen `assets/`.
 
+## Sponsorsida för TV
+- Egen sida bara för sponsorerna: **https://paulhedberg91.github.io/HYROX-Simulering-PACE/sponsorer.html**
+- Visar alla sponsorer i 12 sekunder, sedan en sponsor i taget i 6 sekunder vardera, och börjar om. Klocka och PACE-logga syns hela tiden.
+- Öppna den i TV:ns webbläsare, på en dator kopplad till TV:n eller på en extra iPad/mobil som speglas till TV:n. Ett tryck ger helskärm där det går. Den behöver ingen synk med tidtagningen.
+
 ## Viktigt
 - Allt sparas automatiskt på iPaden (`localStorage`). **Använd inte privat surfning.**
 - Ta en **backup** under *Inställningar* ett par gånger under dagen. *Exportera resultat (CSV)* går att öppna i Excel eller Numbers.

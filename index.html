@@ -577,7 +577,7 @@ const V = {
       <label class="chk"><input id="f-auto" type="checkbox" data-path="event.auto"${ev.auto ? ' checked' : ''}> Automatiska starter: när första heatet har gått startar resten enligt startlistans tider (08:30, 09:00 … 12:45, 13:00 …)</label>
       <div class="row"><span class="eyebrow">Flytta alla kommande heat (nästa heat visas i mitten)</span>${ivStepper()}</div>
       <label class="chk"><input id="f-spshow" type="checkbox" data-path="event.sponsorShow"${ev.sponsorShow ? ' checked' : ''}> Sponsorvisning i helskärm: var 48:e sekund i 8 sekunder (bara under Tidtagning, när ingen rört skärmen och ingen start är nära)</label>
-      <div><button class="btn sm" type="button" data-act="sp-test">Testa sponsorvisning</button></div>
+      <div class="row"><button class="btn sm" type="button" data-act="sp-test">Testa sponsorvisning</button><a class="btn sm" href="sponsorer.html" target="_blank" rel="noopener">Öppna sponsorsidan för TV ↗</a></div>
       <label class="chk"><input id="f-spons" type="checkbox" data-path="event.sponsors"${ev.sponsors ? ' checked' : ''}> Visa sponsorer längst ner i nedräkningen</label>
       <label class="chk"><input id="f-sound" type="checkbox" data-path="event.sound"${ev.sound ? ' checked' : ''}> Ljud under nedräkningen: trumslag varje sekund och mässingsstötar på 3-2-1 (GOGO! är tyst)</label>
       <div class="grid">
