@@ -52,6 +52,7 @@ body{background:radial-gradient(80% 70% at 50% 35%, #16233d 0%, var(--ink) 75%) 
 .dots i.on{background:var(--accent);transform:scale(1.3)}
 .prog{flex:1;max-width:30%;height:calc(var(--u)*.45);border-radius:999px;background:var(--line);overflow:hidden}
 .prog i{display:block;height:100%;width:0;background:var(--accent)}
+.dk{background:#000!important}
 .wm{font-family:var(--font-display);font-weight:900;color:#0a0f1c;letter-spacing:.06em;line-height:1;font-size:min(calc(var(--u)*6),9vh)}
 .solo .card .wm{font-size:min(calc(var(--u)*16),24vh)}
 .hint{position:fixed;left:50%;bottom:calc(var(--u)*2);transform:translateX(-50%);background:rgba(0,0,0,.6);color:#fff;padding:10px 16px;border-radius:999px;font-size:14px;transition:opacity .5s;cursor:default}
@@ -84,7 +85,7 @@ const SPONSORS = [
   { name:'NOCCO', src:'assets/nocco.jpg' },
   { name:'Toveks Bil', src:'assets/toveks.jpg' },
   { name:'Hajen Lågpris', src:'assets/hajen.jpg' },
-  { name:'ZUP', text:'ZUP' },   // TODO: byt till logga (assets/zup.png) när den finns
+  { name:'ZUP Burger', src:'assets/zup.jpg', dark:true },   // vit logga – visas på svart bricka
 ];
 const GRID_MS = 12000, SOLO_MS = 6000;   // alla sponsorer 12 s, sedan varje sponsor 6 s, och om igen
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -92,8 +93,8 @@ const logo = x => x.src ? `<img src="${x.src}" alt="${esc(x.name)}">` : `<b clas
 const pad = n => String(n).padStart(2, '0');
 
 // Bygg bilderna: rutnät + en bild per sponsor
-const slides = [{ ms:GRID_MS, html:`<div class="title">Tack till våra sponsorer</div><div class="grid">${SPONSORS.map((x, i) => `<div class="tile" style="animation-delay:${.1 + i * .15}s">${logo(x)}</div>`).join('')}</div>` }]
-  .concat(SPONSORS.map(x => ({ ms:SOLO_MS, solo:true, html:`<div class="lbl">Sponsor</div><div class="card">${logo(x)}</div><div class="name">${esc(x.name)}</div>` })));
+const slides = [{ ms:GRID_MS, html:`<div class="title">Tack till våra sponsorer</div><div class="grid">${SPONSORS.map((x, i) => `<div class="tile${x.dark ? ' dk' : ''}" style="animation-delay:${.1 + i * .15}s">${logo(x)}</div>`).join('')}</div>` }]
+  .concat(SPONSORS.map(x => ({ ms:SOLO_MS, solo:true, html:`<div class="lbl">Sponsor</div><div class="card${x.dark ? ' dk' : ''}">${logo(x)}</div><div class="name">${esc(x.name)}</div>` })));
 const body = document.getElementById('body');
 body.innerHTML = slides.map(s => `<div class="slide ${s.solo ? 'solo' : ''}">${s.html}</div>`).join('');
 const els = [...body.children];

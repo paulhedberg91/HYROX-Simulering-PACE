@@ -224,6 +224,7 @@ textarea{resize:vertical;line-height:1.5;min-height:110px}
 @keyframes spbar{from{width:0}to{width:100%}}
 #spshow .sp-hint{font-size:13px;color:var(--muted);letter-spacing:.06em}
 @media (max-width:600px){#spshow .sp-grid span{flex-basis:calc((100% - clamp(12px,2.4vmin,28px)) / 2)}}
+.dk{background:#000!important}
 .wm{font-family:var(--font-display);font-weight:900;font-size:clamp(22px,4.5vmin,64px);letter-spacing:.06em;color:#0a0f1c;line-height:1}
 #cd .cd-foot .logos .wm{font-size:clamp(16px,3.4vmin,34px);padding:0 .4em}
 @media (prefers-reduced-motion:reduce){#spshow,#spshow .sp-grid span{animation:none;opacity:1}}
@@ -708,14 +709,14 @@ const SPONSORS = [
   { name:'NOCCO', src:'assets/nocco.jpg', sq:true },
   { name:'Toveks Bil', src:'assets/toveks.jpg' },
   { name:'Hajen Lågpris', src:'assets/hajen.jpg' },
-  { name:'ZUP', text:'ZUP' },   // TODO: byt till logga (assets/zup.png) när den finns
+  { name:'ZUP Burger', src:'assets/zup.jpg', dark:true },   // vit logga – visas på svart bricka
 ];
 const logo = x => x.src ? `<img src="${x.src}" alt="${esc(x.name)}">` : `<b class="wm">${esc(x.text || x.name)}</b>`;   // text tills loggan finns
 const SP_EVERY = 48000, SP_SHOW = 8000;
 let spLast = Date.now(), spOpenUntil = 0, spT = null;
 function showSponsors(force) {
   const el = $('#spshow');
-  $('#sp-grid').innerHTML = SPONSORS.map((x, i) => `<span class="${x.sq ? 'sq' : ''}" style="animation-delay:${.15 + i * .18}s">${logo(x)}</span>`).join('');
+  $('#sp-grid').innerHTML = SPONSORS.map((x, i) => `<span class="${x.sq ? 'sq' : ''}${x.dark ? ' dk' : ''}" style="animation-delay:${.15 + i * .18}s">${logo(x)}</span>`).join('');
   el.style.setProperty('--spdur', SP_SHOW / 1000 + 's');
   el.classList.remove('out'); el.hidden = false;
   spOpenUntil = Date.now() + SP_SHOW;
@@ -738,7 +739,7 @@ function sponsorTick(now) {   // visa sponsorerna när det är lugnt – aldrig 
 function renderSponsors() {
   const el = $('#cd-spons');
   el.hidden = !state.event.sponsors;
-  el.innerHTML = `<div class="t">Tack till våra sponsorer</div><div class="logos">${SPONSORS.map(x => `<span class="${x.sq ? 'sq' : ''}">${logo(x)}</span>`).join('')}</div>`;
+  el.innerHTML = `<div class="t">Tack till våra sponsorer</div><div class="logos">${SPONSORS.map(x => `<span class="${x.sq ? 'sq' : ''}${x.dark ? ' dk' : ''}">${logo(x)}</span>`).join('')}</div>`;
 }
 const GOCOL = {
   blue:  { label:'PACE-blå (rekommenderad)', g2:'#3ba7e6', text:'#ffffff' },

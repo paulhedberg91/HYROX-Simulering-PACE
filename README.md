@@ -23,7 +23,7 @@ En webbapp för iPad, i en enda fil (`index.html`). Ingen installation och inga 
 ## Logga och sponsorer
 - PACE-loggan syns uppe till vänster i appen och i nedräkningen, tillsammans med *Official HYROX Training Club*.
 - Nedräkningen visar vilket heat som startar, till exempel **HEAT 2**, som en stor rubrik ovanför siffran.
-- Sponsorerna (Björn Borg, Kraftmark, Ramudden, NOCCO, Toveks Bil, Hajen Lågpris och ZUP) visas som vita brickor längst ner i nedräkningen och under GOGO!. Det kan stängas av under Inställningar.
+- Sponsorerna (Björn Borg, Kraftmark, Ramudden, NOCCO, Toveks Bil, Hajen Lågpris och ZUP Burger) visas som vita brickor längst ner i nedräkningen och under GOGO!. Det kan stängas av under Inställningar.
 - **Sponsorvisning i helskärm:** var 48:e sekund visas alla sponsorer i 8 sekunder under Tidtagning. Den väntar om någon har rört skärmen, om en ruta eller ett fält är aktivt, eller om en start är nära, och den stängs direkt om man trycker på skärmen. Stäng av eller testa under Inställningar. Loggorna ligger i mappen `assets/`.
 
 ## Sponsorsida för TV
