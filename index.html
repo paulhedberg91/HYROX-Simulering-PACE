@@ -215,15 +215,17 @@ textarea{resize:vertical;line-height:1.5;min-height:110px}
 @keyframes spout{to{opacity:0}}
 #spshow .sp-pace{height:clamp(40px,8vmin,80px);width:auto;opacity:.95}
 #spshow .sp-t{font-family:var(--font-display);font-weight:800;text-transform:uppercase;font-size:clamp(26px,6vmin,64px);letter-spacing:.03em;line-height:1}
-#spshow .sp-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(12px,2.4vmin,28px);width:min(100%,1100px)}
-#spshow .sp-grid span{display:flex;align-items:center;justify-content:center;height:clamp(80px,17vmin,190px);padding:clamp(10px,2vmin,22px);background:#fff;border-radius:16px;box-shadow:0 10px 40px rgba(0,0,0,.4);opacity:0;animation:sppop .7s cubic-bezier(.2,1.3,.4,1) forwards}
+#spshow .sp-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:clamp(12px,2.4vmin,28px);width:min(100%,1100px)}
+#spshow .sp-grid span{flex:0 0 calc((100% - 3 * clamp(12px,2.4vmin,28px)) / 4);display:flex;align-items:center;justify-content:center;height:clamp(80px,17vmin,190px);padding:clamp(10px,2vmin,22px);background:#fff;border-radius:16px;box-shadow:0 10px 40px rgba(0,0,0,.4);opacity:0;animation:sppop .7s cubic-bezier(.2,1.3,.4,1) forwards}
 #spshow .sp-grid img{display:block;max-height:100%;max-width:100%;width:auto;height:100%;object-fit:contain}
 @keyframes sppop{from{opacity:0;transform:translateY(20px) scale(.92)}to{opacity:1;transform:none}}
 #spshow .sp-bar{width:min(60%,420px);height:6px;border-radius:999px;background:var(--line);overflow:hidden}
 #spshow .sp-bar i{display:block;height:100%;background:var(--accent);animation:spbar var(--spdur,8s) linear forwards}
 @keyframes spbar{from{width:0}to{width:100%}}
 #spshow .sp-hint{font-size:13px;color:var(--muted);letter-spacing:.06em}
-@media (max-width:600px){#spshow .sp-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:600px){#spshow .sp-grid span{flex-basis:calc((100% - clamp(12px,2.4vmin,28px)) / 2)}}
+.wm{font-family:var(--font-display);font-weight:900;font-size:clamp(22px,4.5vmin,64px);letter-spacing:.06em;color:#0a0f1c;line-height:1}
+#cd .cd-foot .logos .wm{font-size:clamp(16px,3.4vmin,34px);padding:0 .4em}
 @media (prefers-reduced-motion:reduce){#spshow,#spshow .sp-grid span{animation:none;opacity:1}}
 @media (prefers-reduced-motion:reduce){.tile{transition:none}#cd.flash .big,#cd .big.go,#cd .ring,#cd .rays,#cd.gogo{animation:none}#cd.flash::before{animation:none}#cd.gogo::before{animation:none;opacity:.3}}
 </style>
@@ -706,12 +708,14 @@ const SPONSORS = [
   { name:'NOCCO', src:'assets/nocco.jpg', sq:true },
   { name:'Toveks Bil', src:'assets/toveks.jpg' },
   { name:'Hajen Lågpris', src:'assets/hajen.jpg' },
+  { name:'ZUP', text:'ZUP' },   // TODO: byt till logga (assets/zup.png) när den finns
 ];
+const logo = x => x.src ? `<img src="${x.src}" alt="${esc(x.name)}">` : `<b class="wm">${esc(x.text || x.name)}</b>`;   // text tills loggan finns
 const SP_EVERY = 48000, SP_SHOW = 8000;
 let spLast = Date.now(), spOpenUntil = 0, spT = null;
 function showSponsors(force) {
   const el = $('#spshow');
-  $('#sp-grid').innerHTML = SPONSORS.map((x, i) => `<span class="${x.sq ? 'sq' : ''}" style="animation-delay:${.15 + i * .18}s"><img src="${x.src}" alt="${esc(x.name)}"></span>`).join('');
+  $('#sp-grid').innerHTML = SPONSORS.map((x, i) => `<span class="${x.sq ? 'sq' : ''}" style="animation-delay:${.15 + i * .18}s">${logo(x)}</span>`).join('');
   el.style.setProperty('--spdur', SP_SHOW / 1000 + 's');
   el.classList.remove('out'); el.hidden = false;
   spOpenUntil = Date.now() + SP_SHOW;
@@ -734,7 +738,7 @@ function sponsorTick(now) {   // visa sponsorerna när det är lugnt – aldrig 
 function renderSponsors() {
   const el = $('#cd-spons');
   el.hidden = !state.event.sponsors;
-  el.innerHTML = `<div class="t">Tack till våra sponsorer</div><div class="logos">${SPONSORS.map(x => `<span class="${x.sq ? 'sq' : ''}"><img src="${x.src}" alt="${esc(x.name)}"></span>`).join('')}</div>`;
+  el.innerHTML = `<div class="t">Tack till våra sponsorer</div><div class="logos">${SPONSORS.map(x => `<span class="${x.sq ? 'sq' : ''}">${logo(x)}</span>`).join('')}</div>`;
 }
 const GOCOL = {
   blue:  { label:'PACE-blå (rekommenderad)', g2:'#3ba7e6', text:'#ffffff' },
