@@ -31,6 +31,12 @@ En webbapp för iPad, i en enda fil (`index.html`). Ingen installation och inga 
 - Visar alla sponsorer i 12 sekunder, sedan en sponsor i taget i 6 sekunder vardera, och börjar om. Klocka och PACE-logga syns hela tiden.
 - Öppna den i TV:ns webbläsare, på en dator kopplad till TV:n eller på en extra iPad/mobil som speglas till TV:n. Ett tryck ger helskärm där det går. Den behöver ingen synk med tidtagningen.
 
+## Pass-timer (box)
+- **https://paulhedberg91.github.io/HYROX-Simulering-PACE/pass.html** – timer och visning för ett pass, i samma stil som HYROX-nedräkningen.
+- Just nu: onsdag 11/11 06:00, For time, TC 52 min (Front Squats 0–15, 4 ronder à 3:30 15–29, vila 29–33, X-distance ladder 33–52).
+- Visar blocket som pågår med rörelser, stor nedräkning för blocket eller ronden, rondräknare, tid kvar till cap och en tidslinje för hela passet. 10 s nedräkning före start, pip och en kort skylt vid varje nytt block eller rond, och TIME! vid cap.
+- Klockan fortsätter även om sidan laddas om. Nästa pass läggs in överst i `pass.html` (blocket `WOD`).
+
 ## Viktigt
 - Allt sparas automatiskt på iPaden (`localStorage`). **Använd inte privat surfning.**
 - Ta en **backup** under *Inställningar* ett par gånger under dagen. *Exportera resultat (CSV)* går att öppna i Excel eller Numbers.
