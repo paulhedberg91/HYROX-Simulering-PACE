@@ -35,7 +35,8 @@ En webbapp för iPad, i en enda fil (`index.html`). Ingen installation och inga 
 - **https://paulhedberg91.github.io/HYROX-Simulering-PACE/pass.html** – timer och visning för ett pass, i samma stil som HYROX-nedräkningen.
 - Just nu: onsdag 11/11 06:00, For time, TC 52 min (Front Squats 0–15, 4 ronder à 3:30 15–29, vila 29–33, X-distance ladder 33–52).
 - Visar blocket som pågår med rörelser, stor nedräkning för blocket eller ronden, rondräknare, tid kvar till cap och en tidslinje för hela passet. 10 s nedräkning före start, pip och en kort skylt vid varje nytt block eller rond, och TIME! vid cap.
-- Klockan fortsätter även om sidan laddas om. Nästa pass läggs in överst i `pass.html` (blocket `WOD`).
+- **Flera pass:** välj pass i listan bredvid Starta-knappen (eller med `pass.html#id`). Finns nu: *Onsdag 11/11 06:00* och *Stationspass · 2 varv* (Row 500 m, DL 7, R-L 14, Ski 500 m, S-Press 7, Burpee Place 14, Bike 1000 m, Run 300–400 m i fasta tidsfönster på 20 min, 4 min vila, 2 varv = 44 min).
+- Klockan fortsätter även om sidan laddas om. Nya pass läggs till i listan `WODS` i `pass.html`.
 
 ## Viktigt
 - Allt sparas automatiskt på iPaden (`localStorage`). **Använd inte privat surfning.**

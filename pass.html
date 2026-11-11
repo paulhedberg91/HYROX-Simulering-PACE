@@ -46,6 +46,8 @@ button{font:inherit;color:inherit}
 .moves{list-style:none;margin:0;padding:0;display:grid;gap:calc(var(--u)*1)}
 .moves li{display:grid;grid-template-columns:calc(var(--u)*1.2) 1fr;gap:calc(var(--u)*1.2);align-items:baseline;font-size:calc(var(--u)*2.5);font-weight:600;line-height:1.2}
 .moves li::before{content:"";width:calc(var(--u)*1);height:calc(var(--u)*1);border-radius:2px;background:var(--c);transform:translateY(-.15em)}
+.moves.roomy li:first-child{font-size:calc(var(--u)*5.2);font-family:var(--font-display);font-weight:900;line-height:1}
+.moves.roomy li:first-child::before{width:calc(var(--u)*1.6);height:calc(var(--u)*1.6)}
 .moves.dense{gap:calc(var(--u)*.7)}
 .moves.dense li{font-size:calc(var(--u)*2.1)}
 .moves.dense li.sub{font-size:calc(var(--u)*1.8)}
@@ -84,6 +86,7 @@ button{font:inherit;color:inherit}
 #ov .l2{font-weight:700;letter-spacing:.3em;text-transform:uppercase;font-size:clamp(14px,2.6vmin,28px);color:var(--muted)}
 #ov .n{font-family:var(--font-display);font-weight:900;line-height:.85;font-size:min(48vh,46vw);color:#fff;-webkit-text-stroke:.5vmin var(--oc,#3ba7e6);text-shadow:0 0 6vmin var(--oc,#3ba7e6)}
 #ov .n.word{font-size:min(30vh,24vw)}
+#ov .n.word.long{font-size:min(20vh,11vw)}
 #ov.pop .n{animation:slam .5s cubic-bezier(.15,1.15,.35,1)}
 @keyframes slam{from{transform:scale(1.35);opacity:.4}to{transform:none;opacity:1}}
 #ov .sub{font-size:clamp(14px,2.2vmin,24px);color:var(--muted);font-weight:600}
@@ -118,6 +121,7 @@ button{font:inherit;color:inherit}
     <div class="tl" id="tl"><div class="now" id="tl-now"></div></div>
     <div class="ticks" id="ticks"></div>
     <div class="ctl" id="ctl">
+      <select class="btn" id="w-pick" aria-label="Välj pass"></select>
       <button class="btn go" type="button" id="b-start">▶ Starta passet (10 s nedräkning)</button>
       <button class="btn" type="button" id="b-pause" hidden>❚❚ Paus</button>
       <button class="btn danger" type="button" id="b-reset" hidden>↺ Börja om</button>
@@ -131,26 +135,55 @@ button{font:inherit;color:inherit}
 (() => {
 'use strict';
 /* ============ PASSET – ändra här för nästa pass ============ */
-const WOD = {
-  id: '2026-11-11-0600',
-  title: 'Onsdag 11/11 · 06:00',
-  format: 'For time · Time cap 52 min · Par',
-  cap: 52 * 60,
-  blocks: [
-    { from: 0, to: 15 * 60, tag: 'Block 1 · Min 0–15', name: 'Front Squats', color: 'b1',
-      moves: ['Sätt 1RM – atlet 1', 'Sätt 3RM – atlet 2'] },
-    { from: 15 * 60, to: 29 * 60, tag: 'Block 2 · Min 15–29', name: '4 ronder', color: 'b2', rounds: 4,
-      moves: ['10 SYNC pull-ups', '18 HPS @ 40/30 kg', '14 box step-ups', { sub: 'Varannan rep: P1 – P2 – P1 – P2' }],
-      note: '3:30 per rond' },
-    { from: 29 * 60, to: 33 * 60, tag: 'Vila · Min 29–33', name: 'Vila 4 min', color: 'rest', rest: true,
-      moves: ['Ställ i ordning bike, ski och row', 'Förbered thrusters, lunges & wallballs'] },
-    { from: 33 * 60, to: 36 * 60, tag: 'Block 3 · Min 33–52 · X-distance ladder', name: 'Bike erg 3 min', color: 'b3',
-      moves: ['3 min bike erg', { sub: 'Notera distansen = X' }] },
-    { from: 36 * 60, to: 52 * 60, tag: 'Block 3 · X-distance ladder', name: 'Ladder', color: 'b3',
-      moves: ['Ski erg: halva bike-distansen', 'Row erg: 3 min', 'Bike erg: dubbla distansen', { sub: 'Resten av tiden – 21-15-9-15-21:' }, 'Thrusters · OH R-lunges · Wallballs'],
-      note: 'Kör tills time cap 52:00' },
-  ],
-};
+// Stationspass: varje station har ett fast tidsfönster – gör jobbet och vila resten av tiden
+const ST = [
+  [3, 'Row', '500 m', 'b1'], [2, 'DL', '7 reps', 'b2'], [2, 'R-L', '14 reps', 'b2'], [3, 'Ski', '500 m', 'b1'],
+  [2, 'S-Press', '7 reps', 'b2'], [2, 'Burpee Place', '14 reps', 'b2'], [3, 'Bike', '1000 m', 'b1'], [3, 'Run', '300–400 m', 'b4'],
+];
+function stationBlocks(rounds, restMin) {
+  const out = []; let t = 0;
+  for (let r = 1; r <= rounds; r++) {
+    for (const [min, name, work, color] of ST) {
+      out.push({ from: t * 60, to: (t + min) * 60, tag: `Varv ${r} av ${rounds} · Min ${t}–${t + min}`, name, color, moves: [work, { sub: 'Vila resten av tiden' }] });
+      t += min;
+    }
+    if (r < rounds) { out.push({ from: t * 60, to: (t + restMin) * 60, tag: `Vila · Min ${t}–${t + restMin}`, name: `Vila ${restMin} min`, color: 'rest', rest: true, moves: [`Nästa: varv ${r + 1}`, 'Gör dig redo vid rodden'] }); t += restMin; }
+  }
+  return out;
+}
+const WODS = [
+  {
+    id: '2026-11-11-0600',
+    title: 'Onsdag 11/11 · 06:00',
+    format: 'For time · Time cap 52 min · Par',
+    cap: 52 * 60,
+    blocks: [
+      { from: 0, to: 15 * 60, tag: 'Block 1 · Min 0–15', name: 'Front Squats', color: 'b1',
+        moves: ['Sätt 1RM – atlet 1', 'Sätt 3RM – atlet 2'] },
+      { from: 15 * 60, to: 29 * 60, tag: 'Block 2 · Min 15–29', name: '4 ronder', color: 'b2', rounds: 4,
+        moves: ['10 SYNC pull-ups', '18 HPS @ 40/30 kg', '14 box step-ups', { sub: 'Varannan rep: P1 – P2 – P1 – P2' }],
+        note: '3:30 per rond' },
+      { from: 29 * 60, to: 33 * 60, tag: 'Vila · Min 29–33', name: 'Vila 4 min', color: 'rest', rest: true,
+        moves: ['Ställ i ordning bike, ski och row', 'Förbered thrusters, lunges & wallballs'] },
+      { from: 33 * 60, to: 36 * 60, tag: 'Block 3 · Min 33–52 · X-distance ladder', name: 'Bike erg 3 min', color: 'b3',
+        moves: ['3 min bike erg', { sub: 'Notera distansen = X' }] },
+      { from: 36 * 60, to: 52 * 60, tag: 'Block 3 · X-distance ladder', name: 'Ladder', color: 'b3',
+        moves: ['Ski erg: halva bike-distansen', 'Row erg: 3 min', 'Bike erg: dubbla distansen', { sub: 'Resten av tiden – 21-15-9-15-21:' }, 'Thrusters · OH R-lunges · Wallballs'],
+        note: 'Kör tills time cap 52:00' },
+    ],
+  },
+  {
+    id: '2026-11-stationer-2x20',
+    title: 'Stationspass · 2 varv',
+    format: '20 min stationer · 4 min vila · 44 min',
+    cap: 44 * 60,
+    blocks: stationBlocks(2, 4),
+  },
+];
+// Valt pass: adressens #id, annars senast valda, annars det senaste i listan
+let selId = location.hash.slice(1);
+try { selId = selId || localStorage.getItem('pace-pass-sel') || ''; } catch (e) {}
+const WOD = WODS.find(w => w.id === selId) || WODS[WODS.length - 1];
 /* =========================================================== */
 
 const KEY = 'pace-pass-' + WOD.id;
@@ -168,6 +201,8 @@ const save = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catc
 const elapsed = () => st.startedAt == null ? null : ((st.pausedAt || Date.now()) - st.startedAt) / 1000;
 
 $('w-title').textContent = WOD.title; $('w-format').textContent = WOD.format;
+$('w-pick').innerHTML = WODS.map(w => `<option value="${w.id}"${w.id === WOD.id ? ' selected' : ''}>${esc(w.title)}</option>`).join('');
+$('w-pick').addEventListener('change', e => { try { localStorage.setItem('pace-pass-sel', e.target.value); } catch (x) {} location.hash = e.target.value; location.reload(); });
 
 // Tidslinje
 const tl = $('tl');
@@ -197,6 +232,7 @@ function renderBlock(i) {
   document.documentElement.style.setProperty('--c', colorOf(b));
   $('b-tag').textContent = b.tag; $('b-name').textContent = b.name;
   $('b-moves').classList.toggle('dense', b.moves.length > 4);
+  $('b-moves').classList.toggle('roomy', b.moves.length <= 2 && !b.rest);
   $('b-moves').innerHTML = b.moves.map(m => typeof m === 'string' ? `<li>${esc(m)}</li>` : `<li class="sub">${esc(m.sub)}</li>`).join('');
   $('b-note').textContent = b.note || '';
   $('t-rounds').hidden = !b.rounds;
@@ -208,7 +244,7 @@ let ovT;
 function flashCard(l1, l2, word, color, ms = 2200) {
   const ov = $('ov'); clearTimeout(ovT);
   ov.style.setProperty('--oc', color);
-  $('ov-l1').textContent = l1; $('ov-l2').textContent = l2 || ''; $('ov-n').textContent = word; $('ov-n').className = 'n word'; $('ov-sub').textContent = '';
+  $('ov-l1').textContent = l1; $('ov-l2').textContent = l2 || ''; $('ov-n').textContent = word; $('ov-n').className = 'n word' + (word.length > 6 ? ' long' : ''); $('ov-sub').textContent = '';
   ov.hidden = false; ov.classList.remove('pop'); void ov.offsetWidth; ov.classList.add('pop');
   ovT = setTimeout(() => ov.hidden = true, ms);
 }
@@ -218,7 +254,7 @@ function tick() {
   $('clock').textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
   const t = elapsed();
   const running = st.startedAt != null && !st.pausedAt;
-  $('b-start').hidden = st.startedAt != null; $('b-pause').hidden = st.startedAt == null; $('b-reset').hidden = st.startedAt == null;
+  $('b-start').hidden = st.startedAt != null; $('w-pick').hidden = st.startedAt != null; $('b-pause').hidden = st.startedAt == null; $('b-reset').hidden = st.startedAt == null;
   $('b-pause').textContent = st.pausedAt ? '▶ Fortsätt' : '❚❚ Paus';
 
   // Före start / nedräkning
@@ -256,7 +292,7 @@ function tick() {
   const i = blockAt(t), b = WOD.blocks[i];
   if (i !== shownBlock) {
     renderBlock(i);
-    if (shownBlock !== -1 && t > 1) { beepLong(); flashCard(b.tag, '', b.rest ? 'VILA' : 'GO!', colorOf(b)); }
+    if (shownBlock !== -1 && t > 1) { beepLong(); flashCard(b.tag, '', b.rest ? 'VILA' : b.name.toUpperCase(), colorOf(b), 1800); }
     shownBlock = i; shownRound = -1;
   }
   let left = b.to - t, lbl = b.rest ? 'Vila kvar' : 'Kvar av blocket';
