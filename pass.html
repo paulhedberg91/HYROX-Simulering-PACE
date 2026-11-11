@@ -126,6 +126,30 @@ body.fin .bname{font-size:calc(var(--u)*4)}
 .ed-row input.sub{font-size:15px;color:var(--muted)}
 .ed-row input.chg{border-color:var(--b3)}
 @media (max-width:640px){.ed-row{grid-template-columns:1fr}}
+.topr{display:flex;align-items:center;gap:calc(var(--u)*2.4)}
+@media (max-width:600px){.brand .t{display:none}.clock{display:none}}
+.tabs{display:flex;gap:4px;padding:4px;border-radius:999px;background:color-mix(in srgb,var(--panel) 85%,transparent);border:1px solid var(--line)}
+.tab{appearance:none;border:0;background:transparent;color:var(--muted);font-weight:700;font-size:max(14px,calc(var(--u)*1.4));padding:8px 18px;border-radius:999px;cursor:pointer;min-height:40px}
+.tab.on{background:var(--text);color:var(--ink)}
+#rs{position:fixed;inset:max(calc(var(--u)*11),72px) 0 0;z-index:40;display:grid;padding:0 max(calc(var(--u)*3.2),env(safe-area-inset-right,0px)) calc(var(--u)*2.2) max(calc(var(--u)*3.2),env(safe-area-inset-left,0px));background:var(--ink);cursor:auto}
+.rs-box{display:grid;grid-template-rows:auto 1fr;gap:14px;min-height:0;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:20px}
+.rs-list{overflow:auto;display:grid;grid-auto-rows:max-content;gap:14px;align-content:start;min-height:0}
+.rs-s{border:1px solid var(--line);border-radius:14px;background:var(--panel-2);overflow:hidden}
+.rs-s.cur{border-color:var(--b3)}
+.rs-sh{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--line)}
+.rs-sh .d{font-family:var(--font-display);font-weight:800;text-transform:uppercase;font-size:22px}
+.rs-sh .d small{font-family:var(--font-body);font-weight:700;font-size:12px;letter-spacing:.08em;color:var(--b3);margin-left:8px}
+.rs-sh .tt{font-family:var(--font-num);font-weight:700;font-size:20px;font-variant-numeric:tabular-nums}
+.rs-sh .tt span{color:var(--muted);font-weight:600;font-size:15px;margin-right:6px}
+.rs-tw{overflow-x:auto}
+.rs-t{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;min-width:460px}
+.rs-t th,.rs-t td{padding:8px 16px;text-align:left;border-bottom:1px solid var(--line);font-size:16px}
+.rs-t th{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.rs-t td.n{font-family:var(--font-num);font-weight:700;font-size:20px}
+.rs-t td.dl{font-family:var(--font-num);font-weight:700;font-size:18px}
+.rs-t tr:last-child td{border-bottom:0}
+.rs-t .w{color:var(--muted);font-size:13px;margin-left:6px}
+.rs-del{appearance:none;background:transparent;border:0;color:var(--muted);font-size:13px;cursor:pointer;text-decoration:underline}
 .hint{position:fixed;left:50%;bottom:calc(var(--u)*9);transform:translateX(-50%);background:rgba(0,0,0,.65);padding:8px 14px;border-radius:999px;font-size:13px;color:#fff;transition:opacity .5s;pointer-events:none}
 [hidden]{display:none!important}
 @media (max-aspect-ratio:1/1){.main{grid-template-columns:1fr;grid-template-rows:auto auto}.big{font-size:calc(var(--u)*24)}.brand .t span{display:none}}
@@ -136,7 +160,10 @@ body.fin .bname{font-size:calc(var(--u)*4)}
 <div class="stage">
   <div class="top">
     <div class="brand"><img src="assets/pace.png" alt="PACE Performance &amp; Training"><div class="t"><b id="w-title"></b><span id="w-format"></span></div></div>
-    <div class="clock" id="clock">00:00</div>
+    <div class="topr">
+      <div class="tabs" role="tablist"><button class="tab on" type="button" role="tab" id="tab-timer" aria-selected="true">Timer</button><button class="tab" type="button" role="tab" id="tab-res" aria-selected="false">Resultat</button></div>
+      <div class="clock" id="clock">00:00</div>
+    </div>
   </div>
   <div class="main">
     <div class="card">
@@ -168,6 +195,12 @@ body.fin .bname{font-size:calc(var(--u)*4)}
       <button class="btn" type="button" id="b-next" aria-label="Nästa block">Nästa ⏭</button>
       <button class="btn danger" type="button" id="b-reset" hidden>↺ Börja om</button>
     </div>
+  </div>
+</div>
+<div id="rs" hidden role="tabpanel" aria-label="Resultat">
+  <div class="rs-box">
+    <div class="ed-h"><div><b>Resultat</b><span id="rs-sub"></span></div><button class="btn" type="button" id="rs-close">Till timern</button></div>
+    <div class="rs-list" id="rs-list"></div>
   </div>
 </div>
 <div id="ed" hidden role="dialog" aria-label="Ändra upplägg">
@@ -269,7 +302,7 @@ try { hist = JSON.parse(localStorage.getItem(HKEY) || '[]'); } catch (e) {}
 const saveHist = () => { try { localStorage.setItem(HKEY, JSON.stringify(hist)); } catch (e) {} };
 function archive() {   // spara pågående pass i historiken (en gång) om något är klarmarkerat
   if (st.archived || !Object.keys(st.results).length) return;
-  hist.push({ date: st.workStart || Date.now(), results: st.results }); saveHist(); st.archived = true;
+  hist.push({ date: st.workStart || Date.now(), results: st.results, total: st.finished ? (st.finished - st.workStart) / 1000 : null, edits: JSON.parse(JSON.stringify(edits)) }); saveHist(); st.archived = true;
 }
 const fmtS = sec => `${Math.floor(sec / 60)}:${pad(Math.floor(sec % 60))}`;
 function compare(i, r) {   // jämför med förra gången och bästa tid för sekvensen
@@ -505,6 +538,55 @@ $('b-prev').addEventListener('click', () => {
   jumpTo(inSeq > 3 && !st.finished ? st.seq : st.seq - 1);   // ett tryck = sekvensens början, inom 3 s = sekvensen innan
 });
 segs.forEach((el, k) => el.addEventListener('click', () => jumpTo(k)));
+// Resultat-fliken: alla genomförda pass med splittider och +/- mot passet innan
+function showTab(t) {
+  const res = t === 'res';
+  $('tab-timer').classList.toggle('on', !res); $('tab-res').classList.toggle('on', res);
+  $('tab-timer').setAttribute('aria-selected', !res); $('tab-res').setAttribute('aria-selected', res);
+  $('rs').hidden = !res; if (res) renderResults();
+}
+function renderResults() {
+  const sessions = hist.map((h, k) => ({ ...h, k }));
+  if (!st.archived && Object.keys(st.results || {}).length) sessions.push({ date: st.workStart, results: st.results, total: st.finished ? (st.finished - st.workStart) / 1000 : null, cur: true });
+  $('rs-sub').textContent = `${WOD.title} · ${sessions.length} ${sessions.length === 1 ? 'pass' : 'pass'} sparade på den här enheten`;
+  if (!sessions.length) { $('rs-list').innerHTML = '<p style="margin:0;color:var(--muted);font-size:16px">Inga resultat än. Tryck <b>✓ Klar</b> när du är klar med en sekvens under passet, så hamnar tiderna här.</p>'; return; }
+  const dfmt = t => t ? new Date(t).toLocaleString('sv-SE', { weekday:'short', day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' }) : '';
+  const sign = d => { d = Math.round(d); return `<span class="${d < 0 ? 'good' : d > 0 ? 'bad' : ''}">${d < 0 ? '−' : d > 0 ? '+' : '±'}${fmtS(Math.abs(d))}</span>`; };
+  const varv = b => (/^Varv (\d+)/.exec(b.tag) || [])[1];
+  $('rs-list').innerHTML = sessions.slice().reverse().map(se => {
+    const idx = sessions.indexOf(se), prev = sessions.slice(0, idx);
+    const keys = Object.keys(se.results).map(Number).sort((a, b) => a - b);
+    const sum = keys.reduce((n, i) => n + se.results[i], 0);
+    const pSum = prev.length ? keys.reduce((n, i) => { const p = [...prev].reverse().find(x => x.results[i] != null); return p && n != null ? n + p.results[i] : null; }, 0) : null;
+    const best = i => { const v = sessions.slice(0, idx + 1).map(x => x.results[i]).filter(v => v != null); return Math.min(...v); };
+    const rows = keys.map(i => {
+      const b = B[i]; if (!b) return '';
+      const p = [...prev].reverse().find(x => x.results[i] != null);
+      const work = se.edits && se.edits[b.name] ? se.edits[b.name][0] : (typeof b.moves[0] === 'string' ? b.moves[0] : '');
+      const prevVals = prev.map(x => x.results[i]).filter(v => v != null);
+      const isBest = prevVals.length && se.results[i] < Math.min(...prevVals);   // nytt rekord
+      return `<tr><td>${varv(b) ? `<span class="w" style="margin:0 6px 0 0">V${varv(b)}</span>` : ''}${esc(b.name)}<span class="w">${esc(typeof work === 'string' ? work : '')}</span></td>
+        <td class="n">${fmtS(se.results[i])}${isBest ? ' <span class="good" style="font-size:13px">★ Rekord</span>' : ''}</td>
+        <td class="dl">${p ? sign(se.results[i] - p.results[i]) : '<span class="w" style="margin:0">–</span>'}</td>
+        <td class="w">${p ? fmtS(p.results[i]) : ''}</td></tr>`;
+    }).join('');
+    return `<div class="rs-s ${se.cur ? 'cur' : ''}">
+      <div class="rs-sh"><div class="d">${esc(dfmt(se.date))}${se.cur ? '<small>PÅGÅR</small>' : ''}</div>
+        <div class="tt">${se.total != null ? `<span>Total</span>${fmtS(se.total)} · ` : ''}<span>Splits</span>${fmtS(sum)} ${pSum != null ? sign(sum - pSum) : ''}
+        ${se.cur ? '' : ` <button class="rs-del" type="button" data-k="${se.k}">Ta bort</button>`}</div></div>
+      <div class="rs-tw"><table class="rs-t"><thead><tr><th>Sekvens</th><th>Tid</th><th>+/−</th><th>Förra</th></tr></thead><tbody>${rows}</tbody></table></div>
+    </div>`;
+  }).join('');
+}
+$('tab-timer').addEventListener('click', () => showTab('timer'));
+$('tab-res').addEventListener('click', () => showTab('res'));
+$('rs-close').addEventListener('click', () => showTab('timer'));
+$('rs-list').addEventListener('click', e => {
+  const b = e.target.closest('.rs-del'); if (!b) return;
+  if (!b.dataset.sure) { b.dataset.sure = '1'; b.textContent = 'Tryck igen för att ta bort'; return; }
+  hist.splice(+b.dataset.k, 1); saveHist(); renderResults();
+});
+
 // Redigering av upplägget
 function groups() {   // en rad per unikt sekvensnamn (t.ex. Row gäller båda varven)
   const seen = new Map();
@@ -539,7 +621,7 @@ $('ed-reset').addEventListener('click', e => {
   edits = {}; try { localStorage.removeItem(OKEY); } catch (x) {}
   applyEdits(); openEditor(); if (shownBlock !== 'sum') { const cur = started() ? st.seq : sel; renderBlock(cur); shownBlock = cur; }
 });
-document.addEventListener('pointerdown', e => { ac(); if (!e.target.closest('.ctl') && !e.target.closest('.tl') && !e.target.closest('#b-done') && !e.target.closest('#ed')) { $('ctl').classList.remove('hide'); hideSoon(); } });
+document.addEventListener('pointerdown', e => { ac(); if (!e.target.closest('.ctl') && !e.target.closest('.tl') && !e.target.closest('#b-done') && !e.target.closest('#ed') && !e.target.closest('#rs') && !e.target.closest('.tabs')) { $('ctl').classList.remove('hide'); hideSoon(); } });
 const wake = () => navigator.wakeLock?.request('screen').catch(() => {});
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') wake(); });
 tick(); if (started()) hideSoon();
