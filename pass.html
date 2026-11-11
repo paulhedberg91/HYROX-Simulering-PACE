@@ -70,7 +70,8 @@ button{font:inherit;color:inherit}
 
 .bottom{display:grid;gap:calc(var(--u)*1)}
 .tl{position:relative;display:flex;height:calc(var(--u)*3.6);border-radius:calc(var(--u)*.9);overflow:hidden;border:1px solid var(--line)}
-.tl .seg{position:relative;display:flex;align-items:center;padding:0 calc(var(--u)*.8);font-size:calc(var(--u)*1.15);font-weight:700;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;overflow:hidden;color:#fff;background:color-mix(in srgb,var(--sc) 22%,var(--panel));border-right:1px solid var(--ink)}
+.tl .seg{cursor:pointer;position:relative;display:flex;align-items:center;padding:0 calc(var(--u)*.8);font-size:calc(var(--u)*1.15);font-weight:700;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;overflow:hidden;color:#fff;background:color-mix(in srgb,var(--sc) 22%,var(--panel));border-right:1px solid var(--ink)}
+.tl .seg:hover{filter:brightness(1.25)}
 .tl .seg.past{background:color-mix(in srgb,var(--sc) 55%,var(--panel))}
 .tl .now{position:absolute;top:-2px;bottom:-2px;width:3px;background:#fff;box-shadow:0 0 10px #fff;transition:left .25s linear}
 .ticks{position:relative;height:1.3em;font-family:var(--font-num);font-size:calc(var(--u)*1.2);color:var(--muted);font-variant-numeric:tabular-nums}
@@ -123,7 +124,9 @@ button{font:inherit;color:inherit}
     <div class="ctl" id="ctl">
       <select class="btn" id="w-pick" aria-label="Välj pass"></select>
       <button class="btn go" type="button" id="b-start">▶ Starta passet (10 s nedräkning)</button>
+      <button class="btn" type="button" id="b-prev" aria-label="Föregående block">⏮ Föregående</button>
       <button class="btn" type="button" id="b-pause" hidden>❚❚ Paus</button>
+      <button class="btn" type="button" id="b-next" aria-label="Nästa block">Nästa ⏭</button>
       <button class="btn danger" type="button" id="b-reset" hidden>↺ Börja om</button>
     </div>
   </div>
@@ -254,7 +257,7 @@ function tick() {
   $('clock').textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
   const t = elapsed();
   const running = st.startedAt != null && !st.pausedAt;
-  $('b-start').hidden = st.startedAt != null; $('w-pick').hidden = st.startedAt != null; $('b-pause').hidden = st.startedAt == null; $('b-reset').hidden = st.startedAt == null;
+  $('b-start').hidden = st.startedAt != null; $('w-pick').hidden = st.startedAt != null; $('b-pause').hidden = st.startedAt == null; $('b-prev').hidden = st.startedAt == null; $('b-reset').hidden = st.startedAt == null;
   $('b-pause').textContent = st.pausedAt ? '▶ Fortsätt' : '❚❚ Paus';
 
   // Före start / nedräkning
@@ -307,7 +310,7 @@ function tick() {
   $('t-big').classList.toggle('hot', left <= 10);
   const sLeft = Math.ceil(left);
   if (sLeft <= 3 && sLeft >= 1 && running && lastBeep !== `b${i}-${shownRound}-${sLeft}`) { lastBeep = `b${i}-${shownRound}-${sLeft}`; beepShort(); }
-  $('t-el').textContent = fmt(t); $('t-left').textContent = fmt(WOD.cap - t);
+  $('t-el').textContent = fmt(Math.floor(t)); $('t-left').textContent = fmt(WOD.cap - t);
   const nb = WOD.blocks[i + 1];
   $('t-next').innerHTML = nb ? `Nästa: <b>${esc(nb.name)}</b> om ${fmt(b.to - t)}` : 'Kör tills time cap';
   $('tl-now').style.left = (t / WOD.cap * 100).toFixed(2) + '%';
@@ -330,7 +333,26 @@ $('b-reset').addEventListener('click', e => {
 // Knapparna göms medan passet går – tryck för att visa
 let hideT;
 function hideSoon() { clearTimeout(hideT); hideT = setTimeout(() => { if (st.startedAt != null && !st.pausedAt) { $('ctl').classList.add('hide'); } }, 4000); }
-document.addEventListener('pointerdown', e => { ac(); if (!e.target.closest('.ctl')) { $('ctl').classList.remove('hide'); hideSoon(); } });
+// Hoppa till valfritt block: knapparna eller ett tryck på tidslinjen
+function jumpTo(i) {
+  i = Math.max(0, Math.min(WOD.blocks.length - 1, i));
+  const from = WOD.blocks[i].from * 1000, now = Date.now();
+  ac(); $('ov').hidden = true; clearTimeout(ovT);
+  if (st.startedAt == null || elapsed() < 0) st = { startedAt: now - from, pausedAt: null };   // inte startat än: starta direkt i blocket
+  else if (st.pausedAt) st.startedAt = st.pausedAt - from;
+  else st.startedAt = now - from;
+  if (i > 0) lastBeep = 'go';                // ingen GOGO när man hoppar in mitt i passet
+  save(); tick(); hideSoon(); wake();
+}
+function curBlock() { const t = elapsed(); if (t == null || t < 0) return 0; const i = blockAt(t); return i < 0 ? WOD.blocks.length : i; }
+$('b-next').addEventListener('click', () => jumpTo(curBlock() + 1));
+$('b-prev').addEventListener('click', () => {
+  const i = curBlock(), t = elapsed();
+  // tryck en gång = början av blocket, inom 3 s = föregående block
+  if (i >= 0 && i < WOD.blocks.length && t - WOD.blocks[i].from > 3) jumpTo(i); else jumpTo(i - 1);
+});
+segs.forEach((el, k) => el.addEventListener('click', () => jumpTo(k)));
+document.addEventListener('pointerdown', e => { ac(); if (!e.target.closest('.ctl') && !e.target.closest('.tl')) { $('ctl').classList.remove('hide'); hideSoon(); } });
 const wake = () => navigator.wakeLock?.request('screen').catch(() => {});
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') wake(); });
 tick(); if (st.startedAt != null) hideSoon();
