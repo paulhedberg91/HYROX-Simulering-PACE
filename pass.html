@@ -72,6 +72,7 @@ button{font:inherit;color:inherit}
 .tl{position:relative;display:flex;height:calc(var(--u)*3.6);border-radius:calc(var(--u)*.9);overflow:hidden;border:1px solid var(--line)}
 .tl .seg{cursor:pointer;position:relative;display:flex;align-items:center;padding:0 calc(var(--u)*.8);font-size:calc(var(--u)*1.15);font-weight:700;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;overflow:hidden;color:#fff;background:color-mix(in srgb,var(--sc) 22%,var(--panel));border-right:1px solid var(--ink)}
 .tl .seg:hover{filter:brightness(1.25)}
+.tl .seg.sel{box-shadow:inset 0 0 0 3px #fff}
 .tl .seg.past{background:color-mix(in srgb,var(--sc) 55%,var(--panel))}
 .tl .now{position:absolute;top:-2px;bottom:-2px;width:3px;background:#fff;box-shadow:0 0 10px #fff;transition:left .25s linear}
 .ticks{position:relative;height:1.3em;font-family:var(--font-num);font-size:calc(var(--u)*1.2);color:var(--muted);font-variant-numeric:tabular-nums}
@@ -114,7 +115,7 @@ button{font:inherit;color:inherit}
       <div class="tlbl" id="t-lbl">Kvar av blocket</div>
       <div class="big" id="t-big">15:00</div>
       <div class="rounds" id="t-rounds" hidden></div>
-      <div class="total"><span>Totalt <b id="t-el">0:00</b></span><span>Kvar till cap <b id="t-left">52:00</b></span></div>
+      <div class="total"><span>Totalt <b id="t-el">0:00</b></span><span>Kvar av passet <b id="t-left">52:00</b></span></div>
       <div class="next" id="t-next"></div>
     </div>
   </div>
@@ -189,19 +190,26 @@ try { selId = selId || localStorage.getItem('pace-pass-sel') || ''; } catch (e) 
 const WOD = WODS.find(w => w.id === selId) || WODS[WODS.length - 1];
 /* =========================================================== */
 
-const KEY = 'pace-pass-' + WOD.id;
+const KEY = 'pace-pass2-' + WOD.id;
 const $ = id => document.getElementById(id);
 const pad = n => String(n).padStart(2, '0');
 const fmt = s => { s = Math.max(0, Math.ceil(s)); return `${Math.floor(s / 60)}:${pad(s % 60)}`; };
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const colorOf = b => `var(--${b.color})`;
 const CD = 10;   // sekunders nedräkning före start
+const B = WOD.blocks, N = B.length;
+const dur = i => B[i].to - B[i].from;               // sekvensens längd i sekunder
+const TOTAL = B.reduce((n, b, i) => n + dur(i), 0);
+const before = i => { let n = 0; for (let k = 0; k < i; k++) n += dur(k); return n; };
 
-// Tillstånd: startedAt (ms när 0:00 var), pausedAt, sparas så att omladdning inte stoppar klockan
-let st = { startedAt: null, pausedAt: null };
+/* Sekvenser: passet består av sekvenser i ordning. Varje sekvens har sin egen nedräkning.
+   Hoppar man till en sekvens (t.ex. Burpees) startar den från början och resten följer efter. */
+let st = { seq: 0, seqStart: null, workStart: null, pausedAt: null, finished: null };
 try { st = Object.assign(st, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) {}
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} };
-const elapsed = () => st.startedAt == null ? null : ((st.pausedAt || Date.now()) - st.startedAt) / 1000;
+const nowMs = () => st.pausedAt || Date.now();
+const started = () => st.seqStart != null;
+let sel = 0;   // vald startsekvens innan passet börjar
 
 $('w-title').textContent = WOD.title; $('w-format').textContent = WOD.format;
 $('w-pick').innerHTML = WODS.map(w => `<option value="${w.id}"${w.id === WOD.id ? ' selected' : ''}>${esc(w.title)}</option>`).join('');
@@ -209,10 +217,10 @@ $('w-pick').addEventListener('change', e => { try { localStorage.setItem('pace-p
 
 // Tidslinje
 const tl = $('tl');
-tl.insertAdjacentHTML('afterbegin', WOD.blocks.map((b, i) => `<div class="seg" data-i="${i}" style="flex:${b.to - b.from};--sc:${colorOf(b)}">${esc(b.rest ? 'Vila' : b.name)}</div>`).join(''));
+tl.insertAdjacentHTML('afterbegin', B.map((b, i) => `<div class="seg" data-i="${i}" style="flex:${dur(i)};--sc:${colorOf(b)}">${esc(b.rest ? 'Vila' : b.name)}</div>`).join(''));
 const segs = [...tl.querySelectorAll('.seg')];
-const marks = [0, ...WOD.blocks.map(b => b.to)];
-$('ticks').innerHTML = [...new Set(marks)].map(m => `<span style="position:absolute;left:${m / WOD.cap * 100}%;transform:translateX(${m === 0 ? '0' : m === WOD.cap ? '-100%' : '-50%'})">${m / 60}</span>`).join('');
+const marks = [0, ...B.map((b, i) => before(i + 1))];
+$('ticks').innerHTML = [...new Set(marks)].map(m => `<span style="position:absolute;left:${m / TOTAL * 100}%;transform:translateX(${m === 0 ? '0' : m === TOTAL ? '-100%' : '-50%'})">${m / 60}</span>`).join('');
 
 // Ljud
 let audio;
@@ -227,11 +235,10 @@ function tone(f, d, vol = .25, type = 'triangle') {
 const beepShort = () => tone(660, .16, .3, 'square');
 const beepLong = () => tone(990, .7, .3, 'square');
 
-// Visa block
+// Visa sekvens
 let shownBlock = -1, shownRound = -1, lastBeep = null;
-function blockAt(t) { return WOD.blocks.findIndex(b => t >= b.from && t < b.to); }
 function renderBlock(i) {
-  const b = WOD.blocks[i];
+  const b = B[i];
   document.documentElement.style.setProperty('--c', colorOf(b));
   $('b-tag').textContent = b.tag; $('b-name').textContent = b.name;
   $('b-moves').classList.toggle('dense', b.moves.length > 4);
@@ -252,56 +259,74 @@ function flashCard(l1, l2, word, color, ms = 2200) {
   ovT = setTimeout(() => ov.hidden = true, ms);
 }
 
+// Gå vidare till nästa sekvens när tiden är slut (exakt, även efter omladdning)
+function advance() {
+  if (!started() || st.finished || st.pausedAt) return;
+  const now = Date.now();
+  while (now - st.seqStart >= dur(st.seq) * 1000) {
+    st.seqStart += dur(st.seq) * 1000; st.seq++;
+    if (st.seq >= N) { st.seq = N - 1; st.finished = st.seqStart; break; }
+  }
+  save();
+}
+
+function preview(i) {   // innan start: visa vald startsekvens
+  if (shownBlock !== i) { renderBlock(i); shownBlock = i; }
+  $('t-big').textContent = fmt(dur(i)); $('t-big').classList.remove('hot');
+  $('t-lbl').textContent = i ? 'Startar här' : 'Kvar av sekvensen';
+  $('t-el').textContent = '0:00'; $('t-left').textContent = fmt(TOTAL - before(i));
+  $('t-next').innerHTML = B[i + 1] ? `Sedan: <b>${esc(B[i + 1].name)}</b>` : '';
+  $('tl-now').style.left = (before(i) / TOTAL * 100) + '%';
+  segs.forEach((s, k) => { s.classList.toggle('past', k < i); s.classList.toggle('sel', k === i && !started()); });
+}
+
 function tick() {
-  const now = new Date();
-  $('clock').textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
-  const t = elapsed();
-  const running = st.startedAt != null && !st.pausedAt;
-  $('b-start').hidden = st.startedAt != null; $('w-pick').hidden = st.startedAt != null; $('b-pause').hidden = st.startedAt == null; $('b-prev').hidden = st.startedAt == null; $('b-reset').hidden = st.startedAt == null;
+  const d = new Date();
+  $('clock').textContent = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  advance();
+  const run = started() && !st.pausedAt && !st.finished;
+  $('b-start').hidden = started(); $('w-pick').hidden = started(); $('b-pause').hidden = !started() || !!st.finished; $('b-prev').hidden = !started() && sel === 0; $('b-reset').hidden = !started();
+  $('b-start').textContent = sel ? `▶ Starta från ${B[sel].name} (10 s)` : '▶ Starta passet (10 s nedräkning)';
   $('b-pause').textContent = st.pausedAt ? '▶ Fortsätt' : '❚❚ Paus';
 
-  // Före start / nedräkning
-  if (t == null || t < 0) {
-    if (shownBlock !== 0) { renderBlock(0); shownBlock = 0; }
-    $('t-big').textContent = fmt(WOD.blocks[0].to - WOD.blocks[0].from);
-    $('t-lbl').textContent = 'Kvar av blocket'; $('t-el').textContent = '0:00'; $('t-left').textContent = fmt(WOD.cap);
-    $('t-next').innerHTML = `Nästa: <b>${esc(WOD.blocks[1].name)}</b>`;
-    $('tl-now').style.left = '0%'; segs.forEach(s => s.classList.remove('past'));
-    if (t != null) {   // nedräkningen pågår
-      const s = Math.ceil(-t), ov = $('ov');
-      const col = s > 5 ? 'var(--b1)' : s > 1 ? 'var(--b2)' : 'var(--b3)';
-      ov.hidden = false; ov.style.setProperty('--oc', col);
-      $('ov-l1').textContent = WOD.title.split('·')[0].trim(); $('ov-l2').textContent = 'Startar om';
-      if ($('ov-n').textContent !== String(s)) {
-        $('ov-n').textContent = s; $('ov-n').className = 'n'; ov.classList.remove('pop'); void ov.offsetWidth; ov.classList.add('pop');
-        $('ov-sub').textContent = WOD.blocks[0].name;
-        if (s <= 3 && lastBeep !== 'cd' + s) { lastBeep = 'cd' + s; beepShort(); }
-      }
+  if (!started()) { preview(sel); return; }
+  const inSeq = (nowMs() - st.seqStart) / 1000;
+
+  // Nedräkning före start
+  if (inSeq < 0) {
+    preview(st.seq);
+    const s = Math.ceil(-inSeq), ov = $('ov');
+    ov.hidden = false; ov.style.setProperty('--oc', s > 5 ? 'var(--b1)' : s > 1 ? 'var(--b2)' : 'var(--b3)');
+    $('ov-l1').textContent = WOD.title.split('·')[0].trim(); $('ov-l2').textContent = 'Startar om';
+    if ($('ov-n').textContent !== String(s)) {
+      $('ov-n').textContent = s; $('ov-n').className = 'n'; ov.classList.remove('pop'); void ov.offsetWidth; ov.classList.add('pop');
+      $('ov-sub').textContent = B[st.seq].name;
+      if (s <= 3 && lastBeep !== 'cd' + s) { lastBeep = 'cd' + s; beepShort(); }
     }
     return;
   }
+  if (lastBeep !== 'go' && (nowMs() - st.workStart) < 2000) { lastBeep = 'go'; beepLong(); flashCard(B[st.seq].tag, '', 'GOGO!', 'var(--b3)', 1800); shownBlock = st.seq; renderBlock(st.seq); shownRound = -1; }
 
-  // Start (0:00) – GOGO en gång
-  if (lastBeep !== 'go' && t < 2) { lastBeep = 'go'; beepLong(); flashCard(WOD.blocks[0].tag, '', 'GOGO!', 'var(--b3)', 1800); }
-
-  if (t >= WOD.cap) {   // time cap
-    $('t-big').textContent = '0:00'; $('t-lbl').textContent = 'Time cap'; $('t-el').textContent = fmt(WOD.cap); $('t-left').textContent = '0:00';
+  const total = (nowMs() - st.workStart) / 1000;
+  if (st.finished) {
+    $('t-big').textContent = '0:00'; $('t-big').classList.remove('hot'); $('t-lbl').textContent = 'Klart';
+    $('t-el').textContent = fmt(Math.floor((st.finished - st.workStart) / 1000)); $('t-left').textContent = '0:00';
     $('tl-now').style.left = '100%'; segs.forEach(s => s.classList.add('past'));
     $('t-next').innerHTML = '<b>Bra jobbat!</b>';
-    if (lastBeep !== 'cap') { lastBeep = 'cap'; beepLong(); flashCard('Time cap', WOD.title, 'TIME!', 'var(--warn)', 6000); }
+    if (lastBeep !== 'cap') { lastBeep = 'cap'; if (Date.now() - st.finished < 5000) { beepLong(); flashCard('Passet är klart', WOD.title, 'TIME!', 'var(--warn)', 6000); } }
     return;
   }
 
-  const i = blockAt(t), b = WOD.blocks[i];
+  const i = st.seq, b = B[i];
   if (i !== shownBlock) {
     renderBlock(i);
-    if (shownBlock !== -1 && t > 1) { beepLong(); flashCard(b.tag, '', b.rest ? 'VILA' : b.name.toUpperCase(), colorOf(b), 1800); }
+    if (shownBlock !== -1) { beepLong(); flashCard(b.tag, '', b.rest ? 'VILA' : b.name.toUpperCase(), colorOf(b), 1800); }
     shownBlock = i; shownRound = -1;
   }
-  let left = b.to - t, lbl = b.rest ? 'Vila kvar' : 'Kvar av blocket';
+  let left = dur(i) - inSeq, lbl = b.rest ? 'Vila kvar' : 'Kvar av sekvensen';
   if (b.rounds) {   // ronder med egen nedräkning
-    const len = (b.to - b.from) / b.rounds, r = Math.min(b.rounds - 1, Math.floor((t - b.from) / len));
-    left = b.from + (r + 1) * len - t; lbl = `Rond ${r + 1} av ${b.rounds} · kvar`;
+    const len = dur(i) / b.rounds, r = Math.min(b.rounds - 1, Math.floor(inSeq / len));
+    left = (r + 1) * len - inSeq; lbl = `Rond ${r + 1} av ${b.rounds} · kvar`;
     [...$('t-rounds').children].forEach((el, k) => el.className = k < r ? 'done' : k === r ? 'now' : '');
     if (r !== shownRound) { if (shownRound !== -1) { beepLong(); flashCard(b.tag, '', `ROND ${r + 1}`, colorOf(b), 1600); } shownRound = r; }
   }
@@ -309,53 +334,57 @@ function tick() {
   $('t-big').textContent = fmt(left);
   $('t-big').classList.toggle('hot', left <= 10);
   const sLeft = Math.ceil(left);
-  if (sLeft <= 3 && sLeft >= 1 && running && lastBeep !== `b${i}-${shownRound}-${sLeft}`) { lastBeep = `b${i}-${shownRound}-${sLeft}`; beepShort(); }
-  $('t-el').textContent = fmt(Math.floor(t)); $('t-left').textContent = fmt(WOD.cap - t);
-  const nb = WOD.blocks[i + 1];
-  $('t-next').innerHTML = nb ? `Nästa: <b>${esc(nb.name)}</b> om ${fmt(b.to - t)}` : 'Kör tills time cap';
-  $('tl-now').style.left = (t / WOD.cap * 100).toFixed(2) + '%';
-  segs.forEach((s, k) => s.classList.toggle('past', WOD.blocks[k].to <= t));
+  if (sLeft <= 3 && sLeft >= 1 && run && lastBeep !== `b${i}-${shownRound}-${sLeft}`) { lastBeep = `b${i}-${shownRound}-${sLeft}`; beepShort(); }
+  $('t-el').textContent = fmt(Math.floor(total));
+  const remain = dur(i) - inSeq + TOTAL - before(i + 1);
+  $('t-left').textContent = fmt(remain);
+  const nb = B[i + 1];
+  $('t-next').innerHTML = nb ? `Nästa: <b>${esc(nb.name)}</b> om ${fmt(dur(i) - inSeq)}` : 'Sista sekvensen';
+  $('tl-now').style.left = ((before(i) + inSeq) / TOTAL * 100).toFixed(2) + '%';
+  segs.forEach((s, k) => { s.classList.toggle('past', k < i); s.classList.remove('sel'); });
 }
 setInterval(tick, 200);
 
 // Knappar
-$('b-start').addEventListener('click', () => { ac(); st = { startedAt: Date.now() + CD * 1000, pausedAt: null }; lastBeep = null; shownBlock = -1; save(); tick(); hideSoon(); wake(); });
+$('b-start').addEventListener('click', () => {
+  ac(); const t0 = Date.now() + CD * 1000;
+  st = { seq: sel, seqStart: t0, workStart: t0, pausedAt: null, finished: null }; lastBeep = null; shownBlock = -1; save(); tick(); hideSoon(); wake();
+});
 $('b-pause').addEventListener('click', () => {
-  if (st.pausedAt) { st.startedAt += Date.now() - st.pausedAt; st.pausedAt = null; } else st.pausedAt = Date.now();
+  if (st.pausedAt) { const d = Date.now() - st.pausedAt; st.seqStart += d; st.workStart += d; st.pausedAt = null; } else st.pausedAt = Date.now();
   save(); tick();
 });
 let confirmT;
 $('b-reset').addEventListener('click', e => {
   const b = e.currentTarget;
-  if (b.dataset.sure) { st = { startedAt: null, pausedAt: null }; save(); shownBlock = -1; lastBeep = null; $('ov').hidden = true; b.dataset.sure = ''; b.textContent = '↺ Börja om'; tick(); return; }
+  if (b.dataset.sure) { st = { seq: 0, seqStart: null, workStart: null, pausedAt: null, finished: null }; sel = 0; save(); shownBlock = -1; lastBeep = null; $('ov').hidden = true; b.dataset.sure = ''; b.textContent = '↺ Börja om'; tick(); return; }
   b.dataset.sure = '1'; b.textContent = 'Tryck igen för att börja om'; clearTimeout(confirmT); confirmT = setTimeout(() => { b.dataset.sure = ''; b.textContent = '↺ Börja om'; }, 3000);
 });
 // Knapparna göms medan passet går – tryck för att visa
 let hideT;
-function hideSoon() { clearTimeout(hideT); hideT = setTimeout(() => { if (st.startedAt != null && !st.pausedAt) { $('ctl').classList.add('hide'); } }, 4000); }
-// Hoppa till valfritt block: knapparna eller ett tryck på tidslinjen
+function hideSoon() { clearTimeout(hideT); hideT = setTimeout(() => { if (started() && !st.pausedAt) { $('ctl').classList.add('hide'); } }, 4000); }
+
+// Hoppa till en sekvens: den startar från början och resten av passet följer efter
 function jumpTo(i) {
-  i = Math.max(0, Math.min(WOD.blocks.length - 1, i));
-  const from = WOD.blocks[i].from * 1000, now = Date.now();
+  i = Math.max(0, Math.min(N - 1, i));
   ac(); $('ov').hidden = true; clearTimeout(ovT);
-  if (st.startedAt == null || elapsed() < 0) st = { startedAt: now - from, pausedAt: null };   // inte startat än: starta direkt i blocket
-  else if (st.pausedAt) st.startedAt = st.pausedAt - from;
-  else st.startedAt = now - from;
-  if (i > 0) lastBeep = 'go';                // ingen GOGO när man hoppar in mitt i passet
+  if (!started()) { sel = i; tick(); return; }              // innan start: välj var passet ska börja
+  const now = nowMs();
+  if ((now - st.seqStart) < 0) { st.seqStart = now; st.workStart = now; lastBeep = 'go'; }   // hoppa förbi nedräkningen
+  st.seq = i; st.seqStart = now; st.finished = null;
   save(); tick(); hideSoon(); wake();
 }
-function curBlock() { const t = elapsed(); if (t == null || t < 0) return 0; const i = blockAt(t); return i < 0 ? WOD.blocks.length : i; }
-$('b-next').addEventListener('click', () => jumpTo(curBlock() + 1));
+$('b-next').addEventListener('click', () => jumpTo((started() ? st.seq : sel) + 1));
 $('b-prev').addEventListener('click', () => {
-  const i = curBlock(), t = elapsed();
-  // tryck en gång = början av blocket, inom 3 s = föregående block
-  if (i >= 0 && i < WOD.blocks.length && t - WOD.blocks[i].from > 3) jumpTo(i); else jumpTo(i - 1);
+  if (!started()) { jumpTo(sel - 1); return; }
+  const inSeq = (nowMs() - st.seqStart) / 1000;
+  jumpTo(inSeq > 3 && !st.finished ? st.seq : st.seq - 1);   // ett tryck = sekvensens början, inom 3 s = sekvensen innan
 });
 segs.forEach((el, k) => el.addEventListener('click', () => jumpTo(k)));
 document.addEventListener('pointerdown', e => { ac(); if (!e.target.closest('.ctl') && !e.target.closest('.tl')) { $('ctl').classList.remove('hide'); hideSoon(); } });
 const wake = () => navigator.wakeLock?.request('screen').catch(() => {});
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') wake(); });
-tick(); if (st.startedAt != null) hideSoon();
+tick(); if (started()) hideSoon();
 })();
 </script>
 </body>
