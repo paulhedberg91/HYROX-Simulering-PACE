@@ -1,5 +1,5 @@
 // Enkel offline-cache så att tidtagningen fungerar även om gymmets wifi strular.
-const CACHE = 'pace-hyrox-v6';
+const CACHE = 'pace-hyrox-v7';
 const FILES = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './assets/pace.png', './assets/bjornborg.jpg', './assets/kraftmark.jpg', './assets/ramudden.jpg', './assets/nocco.jpg', './assets/toveks.jpg', './assets/hajen.jpg', './sponsorer.html', './assets/zup.jpg', './pass.html'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES))); self.skipWaiting(); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k))))); self.clients.claim(); });

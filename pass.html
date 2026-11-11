@@ -147,6 +147,7 @@ body.fin .bname{font-size:calc(var(--u)*4)}
     <div class="ctl" id="ctl">
       <select class="btn" id="w-pick" aria-label="Välj pass"></select>
       <button class="btn go" type="button" id="b-start">▶ Starta passet (10 s nedräkning)</button>
+      <button class="btn go" type="button" id="b-now">⚡ Starta direkt</button>
       <button class="btn" type="button" id="b-prev" aria-label="Föregående block">⏮ Föregående</button>
       <button class="btn" type="button" id="b-pause" hidden>❚❚ Paus</button>
       <button class="btn" type="button" id="b-next" aria-label="Nästa block">Nästa ⏭</button>
@@ -361,8 +362,9 @@ function tick() {
   $('clock').textContent = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
   advance();
   const run = started() && !st.pausedAt && !st.finished;
-  $('b-start').hidden = started(); $('w-pick').hidden = started(); $('b-pause').hidden = !started() || !!st.finished; $('b-prev').hidden = !started() && sel === 0; $('b-reset').hidden = !started();
-  $('b-start').textContent = sel ? `▶ Starta från ${B[sel].name} (10 s)` : '▶ Starta passet (10 s nedräkning)';
+  $('b-start').hidden = started(); $('b-now').hidden = started(); $('w-pick').hidden = started(); $('b-pause').hidden = !started() || !!st.finished; $('b-prev').hidden = !started() && sel === 0; $('b-reset').hidden = !started();
+  $('b-start').textContent = sel ? `▶ Starta från ${B[sel].name} (10 s)` : '▶ Starta med nedräkning (10 s)';
+  $('b-now').textContent = sel ? `⚡ Starta direkt från ${B[sel].name}` : '⚡ Starta direkt';
   $('b-pause').textContent = st.pausedAt ? '▶ Fortsätt' : '❚❚ Paus';
 
   if (!started()) { preview(sel); return; }
@@ -426,6 +428,11 @@ function tick() {
 setInterval(tick, 200);
 
 // Knappar
+$('b-now').addEventListener('click', () => {   // ingen nedräkning: klockan går direkt
+  ac(); const t0 = Date.now();
+  st = { seq: sel, seqStart: t0, workStart: t0, pausedAt: null, finished: null, results: {} }; lastBeep = 'go'; shownBlock = -1;
+  save(); beepLong(); flashCard(B[sel].tag, '', 'GOGO!', 'var(--b3)', 1200); tick(); hideSoon(); wake();
+});
 $('b-start').addEventListener('click', () => {
   ac(); const t0 = Date.now() + CD * 1000;
   st = { seq: sel, seqStart: t0, workStart: t0, pausedAt: null, finished: null, results: {} }; lastBeep = null; shownBlock = -1; save(); tick(); hideSoon(); wake();
