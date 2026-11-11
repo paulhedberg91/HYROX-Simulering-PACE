@@ -57,8 +57,10 @@ button{font:inherit;color:inherit}
 
 .tcard{align-items:center;justify-content:center;text-align:center;gap:calc(var(--u)*1.2)}
 .tlbl{font-weight:700;letter-spacing:.24em;text-transform:uppercase;font-size:calc(var(--u)*1.5);color:var(--muted)}
-.big{font-family:var(--font-display);font-weight:900;line-height:.85;font-size:calc(var(--u)*17);font-variant-numeric:tabular-nums;color:#fff;text-shadow:0 0 calc(var(--u)*3) color-mix(in srgb,var(--c) 60%,transparent)}
+.big{font-family:var(--font-display);font-weight:900;line-height:.85;font-size:min(calc(var(--u)*15),24vh);transition:font-size .3s;font-variant-numeric:tabular-nums;color:#fff;text-shadow:0 0 calc(var(--u)*3) color-mix(in srgb,var(--c) 60%,transparent)}
 .big.hot{color:var(--c)}
+.tcard.hasres{gap:calc(var(--u)*.9)}
+.tcard.hasres .big{font-size:min(calc(var(--u)*10.5),17vh)}
 .rounds{display:flex;gap:calc(var(--u)*1)}
 .rounds i{font-style:normal;font-family:var(--font-num);font-weight:700;font-size:calc(var(--u)*2.4);width:calc(var(--u)*5);height:calc(var(--u)*5);display:grid;place-items:center;border-radius:calc(var(--u)*1);border:2px solid var(--line);color:var(--muted)}
 .rounds i.done{background:color-mix(in srgb,var(--c) 30%,transparent);border-color:var(--c);color:#fff}
@@ -82,6 +84,24 @@ button{font:inherit;color:inherit}
 .btn.go{background:var(--b3);border-color:var(--b3);color:#04140b}
 .btn.danger{color:#ff5d6c;background:transparent}
 
+/* Klar-knapp och resultat */
+.tcard>*{flex-shrink:0}
+.donebtn{appearance:none;line-height:1.1;border:0;border-radius:calc(var(--u)*1.4);background:var(--b3);color:#04140b;font-family:var(--font-display);font-weight:900;text-transform:uppercase;letter-spacing:.04em;font-size:calc(var(--u)*3.4);padding:calc(var(--u)*.9) calc(var(--u)*4);cursor:pointer;box-shadow:0 calc(var(--u)*.6) calc(var(--u)*2.4) color-mix(in srgb,var(--b3) 35%,transparent);min-height:56px}
+.donebtn:active{transform:scale(.97)}
+.donebtn.undo{background:transparent;color:var(--muted);border:1px solid var(--line);box-shadow:none;font-family:var(--font-body);font-size:calc(var(--u)*1.5);font-weight:700;letter-spacing:.06em;padding:calc(var(--u)*.6) calc(var(--u)*2);min-height:40px}
+.res{display:grid;gap:calc(var(--u)*.4);justify-items:center;font-size:calc(var(--u)*1.7);color:var(--muted);font-weight:600}
+.res:empty{display:none}
+.res .done{font-family:var(--font-display);font-weight:900;text-transform:uppercase;font-size:calc(var(--u)*3.4);color:var(--b3);line-height:1}
+.res b{color:var(--text)}
+.good{color:var(--b3)!important}.bad{color:#ff7a85!important}
+.sum{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:calc(var(--u)*.5) calc(var(--u)*2.4)}
+body.fin .main{grid-template-columns:1.8fr 1fr}
+body.fin .bname{font-size:calc(var(--u)*4)}
+.sum div{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:calc(var(--u)*1);align-items:baseline;padding:calc(var(--u)*.3) 0;border-bottom:1px solid var(--line);font-size:min(calc(var(--u)*1.55),2.5vh)}
+.sum .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sum div b{font-family:var(--font-num);font-size:1.25em;font-variant-numeric:tabular-nums}
+.sum div span:last-child{font-family:var(--font-num);font-variant-numeric:tabular-nums;min-width:3.6em;text-align:right}
+.sum .nm small{color:var(--muted);margin-left:.4em}
 /* Nedräkning före start + övergångar */
 #ov{position:fixed;inset:0;z-index:50;display:grid;place-items:center;align-content:center;text-align:center;gap:2vmin;background:radial-gradient(60% 60% at 50% 50%, color-mix(in srgb,var(--oc,#3ba7e6) 24%,var(--ink)) 0%, var(--ink) 75%)}
 #ov .l1{font-family:var(--font-display);font-weight:900;text-transform:uppercase;font-size:clamp(34px,8vmin,100px);padding:.1em .5em;border-radius:.25em;border:.06em solid var(--oc,#3ba7e6);background:color-mix(in srgb,var(--oc,#3ba7e6) 25%,transparent)}
@@ -116,6 +136,8 @@ button{font:inherit;color:inherit}
       <div class="big" id="t-big">15:00</div>
       <div class="rounds" id="t-rounds" hidden></div>
       <div class="total"><span>Totalt <b id="t-el">0:00</b></span><span>Kvar av passet <b id="t-left">52:00</b></span></div>
+      <div class="res" id="t-res"></div>
+      <button class="donebtn" type="button" id="b-done" hidden>✓ Klar</button>
       <div class="next" id="t-next"></div>
     </div>
   </div>
@@ -204,8 +226,29 @@ const before = i => { let n = 0; for (let k = 0; k < i; k++) n += dur(k); return
 
 /* Sekvenser: passet består av sekvenser i ordning. Varje sekvens har sin egen nedräkning.
    Hoppar man till en sekvens (t.ex. Burpees) startar den från början och resten följer efter. */
-let st = { seq: 0, seqStart: null, workStart: null, pausedAt: null, finished: null };
+let st = { seq: 0, seqStart: null, workStart: null, pausedAt: null, finished: null, results: {} };
 try { st = Object.assign(st, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) {}
+st.results = st.results || {};
+
+// Historik: tidigare genomförda pass med tider per sekvens (sparas på enheten)
+const HKEY = 'pace-pass-hist-' + WOD.id;
+let hist = [];
+try { hist = JSON.parse(localStorage.getItem(HKEY) || '[]'); } catch (e) {}
+const saveHist = () => { try { localStorage.setItem(HKEY, JSON.stringify(hist)); } catch (e) {} };
+function archive() {   // spara pågående pass i historiken (en gång) om något är klarmarkerat
+  if (st.archived || !Object.keys(st.results).length) return;
+  hist.push({ date: st.workStart || Date.now(), results: st.results }); saveHist(); st.archived = true;
+}
+const fmtS = sec => `${Math.floor(sec / 60)}:${pad(Math.floor(sec % 60))}`;
+function compare(i, r) {   // jämför med förra gången och bästa tid för sekvensen
+  const prevs = hist.filter(h => h.results[i] != null);
+  const last = prevs.length ? prevs[prevs.length - 1].results[i] : null;
+  const best = prevs.length ? Math.min(...prevs.map(h => h.results[i])) : null;
+  const delta = (a, b) => { const d = Math.round(a - b); return `<span class="${d < 0 ? 'good' : d > 0 ? 'bad' : ''}">${d < 0 ? '−' : d > 0 ? '+' : '±'}${fmtS(Math.abs(d))}</span>`; };
+  return { last, best, html: r == null
+    ? (last != null ? `Förra gången <b>${fmtS(last)}</b> · Bästa <b>${fmtS(best)}</b>` : '')
+    : (last != null ? `${delta(r, last)} mot förra (${fmtS(last)}) · Bästa <b>${fmtS(Math.min(best, r))}</b>${r < best ? ' · <span class="good">Nytt rekord!</span>' : ''}` : 'Första gången – nu har du en tid att slå') };
+}
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} };
 const nowMs = () => st.pausedAt || Date.now();
 const started = () => st.seqStart != null;
@@ -239,6 +282,8 @@ const beepLong = () => tone(990, .7, .3, 'square');
 let shownBlock = -1, shownRound = -1, lastBeep = null;
 function renderBlock(i) {
   const b = B[i];
+  document.body.classList.remove('fin');
+  if ($('b-moves').tagName !== 'UL') $('b-moves').outerHTML = '<ul class="moves" id="b-moves"></ul>';
   document.documentElement.style.setProperty('--c', colorOf(b));
   $('b-tag').textContent = b.tag; $('b-name').textContent = b.name;
   $('b-moves').classList.toggle('dense', b.moves.length > 4);
@@ -270,12 +315,43 @@ function advance() {
   save();
 }
 
+function renderSummary() {   // efter passet: alla tider jämfört med förra gången
+  const prevHist = st.archived ? hist.slice(0, -1) : hist;   // senaste posten är det här passet
+  document.documentElement.style.setProperty('--c', 'var(--b3)');
+  $('b-tag').textContent = 'Passet klart'; $('b-name').textContent = 'Dina tider'; $('b-note').textContent = '';
+  $('t-rounds').hidden = true;
+  let rows = B.map((b, i) => ({ b, i })).filter(x => !x.b.rest);
+  const has = ({ i }) => st.results[i] != null || prevHist.some(h => h.results[i] != null);
+  if (rows.some(has)) rows = rows.filter(has);   // visa bara sekvenser med tider
+  const varv = b => (/^Varv (\d+)/.exec(b.tag) || [])[1];
+  const work = b => typeof b.moves[0] === 'string' ? b.moves[0] : '';
+  $('b-moves').className = 'moves'; $('b-moves').outerHTML = `<div class="sum" id="b-moves">${rows.map(({ b, i }) => {
+    const r = st.results[i], ps = prevHist.filter(h => h.results[i] != null), last = ps.length ? ps[ps.length - 1].results[i] : null;
+    const d = r != null && last != null ? Math.round(r - last) : null;
+    return `<div><span class="nm">${varv(b) ? `<small style="margin:0 .5em 0 0">V${varv(b)}</small>` : ''}${esc(b.name)}<small>${esc(work(b))}</small></span><b>${r != null ? fmtS(r) : '–'}</b><span class="${d == null ? '' : d < 0 ? 'good' : d > 0 ? 'bad' : ''}">${d == null ? (last != null ? fmtS(last) : '') : (d < 0 ? '−' : d > 0 ? '+' : '±') + fmtS(Math.abs(d))}</span></div>`;
+  }).join('')}</div>`;
+}
+function renderDone(i, inSeq) {   // Klar-knappen och resultatraden för sekvensen som pågår
+  const b = B[i], r = st.results[i], can = started() && inSeq >= 0 && !st.finished && !b.rest;
+  $('b-done').hidden = !can;
+  document.querySelector('.tcard').classList.toggle('hasres', can && r != null);
+  if (!can) { $('t-res').innerHTML = ''; return; }
+  const c = compare(i, r);
+  if (r != null) {
+    $('b-done').textContent = 'Ångra klar'; $('b-done').className = 'donebtn undo';
+    $('t-res').innerHTML = `<div class="done">✓ Klar på ${fmtS(r)}</div><div>${c.html}</div>`;
+  } else {
+    $('b-done').textContent = '✓ Klar'; $('b-done').className = 'donebtn';
+    $('t-res').innerHTML = c.html ? `<div>${c.html}</div>` : '';
+  }
+}
 function preview(i) {   // innan start: visa vald startsekvens
   if (shownBlock !== i) { renderBlock(i); shownBlock = i; }
   $('t-big').textContent = fmt(dur(i)); $('t-big').classList.remove('hot');
   $('t-lbl').textContent = i ? 'Startar här' : 'Kvar av sekvensen';
   $('t-el').textContent = '0:00'; $('t-left').textContent = fmt(TOTAL - before(i));
   $('t-next').innerHTML = B[i + 1] ? `Sedan: <b>${esc(B[i + 1].name)}</b>` : '';
+  $('b-done').hidden = true; const c = compare(i, null); $('t-res').innerHTML = c.html ? `<div>${c.html}</div>` : '';
   $('tl-now').style.left = (before(i) / TOTAL * 100) + '%';
   segs.forEach((s, k) => { s.classList.toggle('past', k < i); s.classList.toggle('sel', k === i && !started()); });
 }
@@ -309,6 +385,9 @@ function tick() {
 
   const total = (nowMs() - st.workStart) / 1000;
   if (st.finished) {
+    if (!st.archived) { archive(); save(); }
+    $('b-done').hidden = true; $('t-res').innerHTML = '';
+    if (shownBlock !== 'sum') { document.body.classList.add('fin'); renderSummary(); shownBlock = 'sum'; }
     $('t-big').textContent = '0:00'; $('t-big').classList.remove('hot'); $('t-lbl').textContent = 'Klart';
     $('t-el').textContent = fmt(Math.floor((st.finished - st.workStart) / 1000)); $('t-left').textContent = '0:00';
     $('tl-now').style.left = '100%'; segs.forEach(s => s.classList.add('past'));
@@ -340,6 +419,7 @@ function tick() {
   $('t-left').textContent = fmt(remain);
   const nb = B[i + 1];
   $('t-next').innerHTML = nb ? `Nästa: <b>${esc(nb.name)}</b> om ${fmt(dur(i) - inSeq)}` : 'Sista sekvensen';
+  renderDone(i, inSeq);
   $('tl-now').style.left = ((before(i) + inSeq) / TOTAL * 100).toFixed(2) + '%';
   segs.forEach((s, k) => { s.classList.toggle('past', k < i); s.classList.remove('sel'); });
 }
@@ -348,7 +428,13 @@ setInterval(tick, 200);
 // Knappar
 $('b-start').addEventListener('click', () => {
   ac(); const t0 = Date.now() + CD * 1000;
-  st = { seq: sel, seqStart: t0, workStart: t0, pausedAt: null, finished: null }; lastBeep = null; shownBlock = -1; save(); tick(); hideSoon(); wake();
+  st = { seq: sel, seqStart: t0, workStart: t0, pausedAt: null, finished: null, results: {} }; lastBeep = null; shownBlock = -1; save(); tick(); hideSoon(); wake();
+});
+$('b-done').addEventListener('click', () => {
+  const i = st.seq;
+  if (st.results[i] != null) delete st.results[i];
+  else { st.results[i] = Math.max(0, (nowMs() - st.seqStart) / 1000); beepShort(); }
+  save(); tick();
 });
 $('b-pause').addEventListener('click', () => {
   if (st.pausedAt) { const d = Date.now() - st.pausedAt; st.seqStart += d; st.workStart += d; st.pausedAt = null; } else st.pausedAt = Date.now();
@@ -357,7 +443,7 @@ $('b-pause').addEventListener('click', () => {
 let confirmT;
 $('b-reset').addEventListener('click', e => {
   const b = e.currentTarget;
-  if (b.dataset.sure) { st = { seq: 0, seqStart: null, workStart: null, pausedAt: null, finished: null }; sel = 0; save(); shownBlock = -1; lastBeep = null; $('ov').hidden = true; b.dataset.sure = ''; b.textContent = '↺ Börja om'; tick(); return; }
+  if (b.dataset.sure) { archive(); st = { seq: 0, seqStart: null, workStart: null, pausedAt: null, finished: null, results: {} }; sel = 0; save(); shownBlock = -1; lastBeep = null; $('ov').hidden = true; b.dataset.sure = ''; b.textContent = '↺ Börja om'; tick(); return; }
   b.dataset.sure = '1'; b.textContent = 'Tryck igen för att börja om'; clearTimeout(confirmT); confirmT = setTimeout(() => { b.dataset.sure = ''; b.textContent = '↺ Börja om'; }, 3000);
 });
 // Knapparna göms medan passet går – tryck för att visa
@@ -381,7 +467,7 @@ $('b-prev').addEventListener('click', () => {
   jumpTo(inSeq > 3 && !st.finished ? st.seq : st.seq - 1);   // ett tryck = sekvensens början, inom 3 s = sekvensen innan
 });
 segs.forEach((el, k) => el.addEventListener('click', () => jumpTo(k)));
-document.addEventListener('pointerdown', e => { ac(); if (!e.target.closest('.ctl') && !e.target.closest('.tl')) { $('ctl').classList.remove('hide'); hideSoon(); } });
+document.addEventListener('pointerdown', e => { ac(); if (!e.target.closest('.ctl') && !e.target.closest('.tl') && !e.target.closest('#b-done')) { $('ctl').classList.remove('hide'); hideSoon(); } });
 const wake = () => navigator.wakeLock?.request('screen').catch(() => {});
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') wake(); });
 tick(); if (started()) hideSoon();

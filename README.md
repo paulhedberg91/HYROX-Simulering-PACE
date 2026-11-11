@@ -38,6 +38,7 @@ En webbapp för iPad, i en enda fil (`index.html`). Ingen installation och inga 
 - **Flera pass:** välj pass i listan bredvid Starta-knappen (eller med `pass.html#id`). Finns nu: *Onsdag 11/11 06:00* och *Stationspass · 2 varv* (Row 500 m, DL 7, R-L 14, Ski 500 m, S-Press 7, Burpee Place 14, Bike 1000 m, Run 300–400 m i fasta tidsfönster på 20 min, 4 min vila, 2 varv = 44 min).
 - **Sekvenser:** passet är en rad sekvenser med egen nedräkning. Hoppar du till en sekvens, till exempel Burpees, startar den från början och resten av passet följer efter i ordning. Totaltiden fortsätter att räkna. Hoppa med *Nästa ⏭* och *⏮ Föregående* (ett tryck = sekvensens början, ett till inom 3 s = sekvensen innan), eller tryck på en sekvens i tidslinjen.
 - **Starta var som helst:** innan start väljer du startsekvens genom att trycka i tidslinjen, och knappen visar då *Starta från …*.
+- **Klar-knapp och jämförelse:** tryck **✓ Klar** när du är klar med en sekvens, så sparas tiden (tryck *Ångra klar* om det blev fel). Under knappen visas förra gången och bästa tid, med +/− och *Nytt rekord!*. Efter passet visas *Dina tider* med jämförelse. Varje genomfört pass sparas i historiken på enheten (även vid *Börja om*).
 - Klockan fortsätter även om sidan laddas om. Nya pass läggs till i listan `WODS` i `pass.html`.
 
 ## Viktigt
