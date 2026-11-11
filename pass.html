@@ -30,12 +30,14 @@
 html,body{height:100%;margin:0}
 body{background:radial-gradient(80% 70% at 70% 20%, color-mix(in srgb,var(--c) 14%,var(--ink)) 0%, var(--ink) 70%) fixed, var(--ink);color:var(--text);font-family:var(--font-body);overflow:hidden;transition:background .6s}
 button{font:inherit;color:inherit}
-.stage{position:fixed;inset:0;display:grid;grid-template-rows:auto 1fr auto;gap:calc(var(--u)*2);padding:calc(var(--u)*2.4) max(calc(var(--u)*3.2),env(safe-area-inset-right,0px)) calc(var(--u)*2.2) max(calc(var(--u)*3.2),env(safe-area-inset-left,0px))}
+.stage{position:fixed;inset:0;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto;gap:calc(var(--u)*2);padding:calc(var(--u)*2.4) max(calc(var(--u)*3.2),env(safe-area-inset-right,0px)) calc(var(--u)*2.2) max(calc(var(--u)*3.2),env(safe-area-inset-left,0px))}
 .top{display:flex;align-items:center;justify-content:space-between;gap:calc(var(--u)*2)}
-.brand{display:flex;align-items:center;gap:calc(var(--u)*1.8);min-width:0}
+.brand{display:flex;align-items:center;gap:calc(var(--u)*1.8);min-width:0;flex:1}
+.brand img{flex:none}
+.topr{flex:none}
 .brand img{height:calc(var(--u)*5.6);width:auto}
 .brand .t{border-left:1px solid var(--line);padding-left:calc(var(--u)*1.8);min-width:0}
-.brand .t b{display:block;font-family:var(--font-display);font-weight:900;text-transform:uppercase;font-size:calc(var(--u)*3.2);line-height:1;white-space:nowrap}
+.brand .t b{display:block;font-family:var(--font-display);font-weight:900;text-transform:uppercase;font-size:calc(var(--u)*3.2);line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .brand .t span{display:block;font-weight:700;letter-spacing:.16em;text-transform:uppercase;font-size:calc(var(--u)*1.2);color:var(--muted);margin-top:.4em}
 .clock{font-family:var(--font-num);font-weight:700;font-size:calc(var(--u)*4);line-height:1;font-variant-numeric:tabular-nums;color:var(--muted)}
 
@@ -53,7 +55,7 @@ button{font:inherit;color:inherit}
 .moves.dense li.sub{font-size:calc(var(--u)*1.8)}
 .moves li.sub{font-size:calc(var(--u)*2);color:var(--muted);font-weight:500}
 .moves li.sub::before{background:transparent;border:2px solid var(--line)}
-.note{margin-top:auto;color:var(--muted);font-size:calc(var(--u)*1.6);font-weight:600}
+.note{color:var(--muted);font-size:calc(var(--u)*1.6);font-weight:600}
 
 .tcard{align-items:center;justify-content:center;text-align:center;gap:calc(var(--u)*1.2)}
 .tlbl{font-weight:700;letter-spacing:.24em;text-transform:uppercase;font-size:calc(var(--u)*1.5);color:var(--muted)}
@@ -71,8 +73,8 @@ button{font:inherit;color:inherit}
 .next b{color:var(--text)}
 
 .bottom{display:grid;gap:calc(var(--u)*1)}
-.tl{position:relative;display:flex;height:calc(var(--u)*3.6);border-radius:calc(var(--u)*.9);overflow:hidden;border:1px solid var(--line)}
-.tl .seg{cursor:pointer;position:relative;display:flex;align-items:center;padding:0 calc(var(--u)*.8);font-size:calc(var(--u)*1.15);font-weight:700;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;overflow:hidden;color:#fff;background:color-mix(in srgb,var(--sc) 22%,var(--panel));border-right:1px solid var(--ink)}
+.tl{position:relative;display:flex;height:max(calc(var(--u)*3.6),44px);border-radius:calc(var(--u)*.9);overflow:hidden;border:1px solid var(--line)}
+.tl .seg{cursor:pointer;position:relative;display:flex;align-items:center;justify-content:center;padding:0 2px;font-size:max(calc(var(--u)*1.15),10px);font-weight:700;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;overflow:hidden;color:#fff;background:color-mix(in srgb,var(--sc) 22%,var(--panel));border-right:1px solid var(--ink)}
 .tl .seg:hover{filter:brightness(1.25)}
 .tl .seg.sel{box-shadow:inset 0 0 0 3px #fff}
 .tl .seg.past{background:color-mix(in srgb,var(--sc) 55%,var(--panel))}
@@ -82,6 +84,7 @@ button{font:inherit;color:inherit}
 .ctl.hide{opacity:0;pointer-events:none}
 .btn{appearance:none;border:1px solid var(--line);background:var(--panel-2);border-radius:12px;padding:10px 18px;font-weight:700;cursor:pointer;min-height:46px}
 .btn.go{background:var(--b3);border-color:var(--b3);color:#04140b}
+.btn.go2{background:transparent;border-color:var(--b3);color:var(--b3)}
 .btn.danger{color:#ff5d6c;background:transparent}
 
 /* Klar-knapp och resultat */
@@ -127,7 +130,7 @@ body.fin .bname{font-size:calc(var(--u)*4)}
 .ed-row input.chg{border-color:var(--b3)}
 @media (max-width:640px){.ed-row{grid-template-columns:1fr}}
 .topr{display:flex;align-items:center;gap:calc(var(--u)*2.4)}
-@media (max-width:600px){.brand .t{display:none}.clock{display:none}}
+@media (max-width:600px){.brand .t{display:none}.clock{display:none}.ticks{display:none}.upnext,.moves li.sub{display:none}.tl .seg{font-size:0}.card{padding:calc(var(--u)*2)}.ctl{gap:6px}.btn{padding:8px 12px;min-height:44px;font-size:14px}}
 .tabs{display:flex;gap:4px;padding:4px;border-radius:999px;background:color-mix(in srgb,var(--panel) 85%,transparent);border:1px solid var(--line)}
 .tab{appearance:none;border:0;background:transparent;color:var(--muted);font-weight:700;font-size:max(14px,calc(var(--u)*1.4));padding:8px 18px;border-radius:999px;cursor:pointer;min-height:40px}
 .tab.on{background:var(--text);color:var(--ink)}
@@ -150,9 +153,24 @@ body.fin .bname{font-size:calc(var(--u)*4)}
 .rs-t tr:last-child td{border-bottom:0}
 .rs-t .w{color:var(--muted);font-size:13px;margin-left:6px}
 .rs-del{appearance:none;background:transparent;border:0;color:var(--muted);font-size:13px;cursor:pointer;text-decoration:underline}
-.hint{position:fixed;left:50%;bottom:calc(var(--u)*9);transform:translateX(-50%);background:rgba(0,0,0,.65);padding:8px 14px;border-radius:999px;font-size:13px;color:#fff;transition:opacity .5s;pointer-events:none}
+body.paused .big{opacity:.4}
+body.paused .tlbl{color:var(--warn);font-size:calc(var(--u)*2.6);letter-spacing:.2em}
+.bottom{position:relative;grid-template-columns:minmax(0,1fr)}
+.tl .seg{min-width:0;letter-spacing:0}
+.ctlhint{position:absolute;left:0;right:0;bottom:0;height:46px;display:grid;place-items:center;color:var(--muted);font-size:max(13px,calc(var(--u)*1.2));font-weight:600;letter-spacing:.08em;opacity:0;transition:opacity .4s;pointer-events:none}
+.ctl.hide+.ctlhint{opacity:.55}
+#undo{position:fixed;left:50%;top:max(16px,env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:55;display:flex;align-items:center;gap:14px;background:var(--text);color:var(--ink);padding:8px 8px 8px 18px;border-radius:999px;font-weight:700;font-size:16px;box-shadow:0 8px 30px rgba(0,0,0,.5);max-width:calc(100% - 32px)}
+#undo button{appearance:none;border:0;background:var(--ink);color:var(--text);font:inherit;padding:10px 18px;border-radius:999px;cursor:pointer;min-height:44px;white-space:nowrap}
+.upnext{margin-top:auto;display:grid;gap:.25em;padding-top:calc(var(--u)*1.4);border-top:1px solid var(--line)}
+.upnext:empty{display:none}
+.upnext span{font-weight:700;letter-spacing:.18em;text-transform:uppercase;font-size:calc(var(--u)*1.25);color:var(--muted)}
+.upnext b{font-family:var(--font-display);font-weight:800;text-transform:uppercase;font-size:calc(var(--u)*2.8);line-height:1}
+.upnext b small{font-family:var(--font-body);font-weight:600;text-transform:none;font-size:.55em;color:var(--muted);margin-left:.5em}
+.card.roomy .bname{font-size:calc(var(--u)*7.4)}
+.card.roomy .moves.roomy li:first-child{font-size:calc(var(--u)*5.6)}
+.note:empty{display:none}
 [hidden]{display:none!important}
-@media (max-aspect-ratio:1/1){.main{grid-template-columns:1fr;grid-template-rows:auto auto}.big{font-size:calc(var(--u)*24)}.brand .t span{display:none}}
+@media (max-aspect-ratio:1/1){:root{--u:min(1.9vw,1.05vh)}.main{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr)}.big{font-size:min(calc(var(--u)*19),17vh)}.tcard.hasres .big{font-size:min(calc(var(--u)*13),11vh)}.brand .t span{display:none}body.fin .main{grid-template-columns:1fr}.sum{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){#ov.pop .n{animation:none}}
 </style>
 </head>
@@ -171,6 +189,7 @@ body.fin .bname{font-size:calc(var(--u)*4)}
       <div class="bname" id="b-name"></div>
       <ul class="moves" id="b-moves"></ul>
       <div class="note" id="b-note"></div>
+      <div class="upnext" id="b-up"></div>
     </div>
     <div class="card tcard">
       <div class="tlbl" id="t-lbl">Kvar av blocket</div>
@@ -188,18 +207,19 @@ body.fin .bname{font-size:calc(var(--u)*4)}
     <div class="ctl" id="ctl">
       <select class="btn" id="w-pick" aria-label="Välj pass"></select>
       <button class="btn go" type="button" id="b-start">▶ Starta passet (10 s nedräkning)</button>
-      <button class="btn go" type="button" id="b-now">⚡ Starta direkt</button>
+      <button class="btn go2" type="button" id="b-now">⚡ Starta direkt</button>
       <button class="btn" type="button" id="b-edit">✎ Ändra upplägg</button>
       <button class="btn" type="button" id="b-prev" aria-label="Föregående block">⏮ Föregående</button>
       <button class="btn" type="button" id="b-pause" hidden>❚❚ Paus</button>
       <button class="btn" type="button" id="b-next" aria-label="Nästa block">Nästa ⏭</button>
       <button class="btn danger" type="button" id="b-reset" hidden>↺ Börja om</button>
     </div>
+    <div class="ctlhint">Tryck på skärmen för knappar</div>
   </div>
 </div>
 <div id="rs" hidden role="tabpanel" aria-label="Resultat">
   <div class="rs-box">
-    <div class="ed-h"><div><b>Resultat</b><span id="rs-sub"></span></div><button class="btn" type="button" id="rs-close">Till timern</button></div>
+    <div class="ed-h"><div><b>Resultat</b><span id="rs-sub"></span></div><div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end"><button class="btn" type="button" id="rs-csv">Exportera CSV</button><button class="btn" type="button" id="rs-close">Till timern</button></div></div>
     <div class="rs-list" id="rs-list"></div>
   </div>
 </div>
@@ -212,7 +232,7 @@ body.fin .bname{font-size:calc(var(--u)*4)}
   </div>
 </div>
 <div id="ov" hidden><div class="l1" id="ov-l1"></div><div class="l2" id="ov-l2"></div><div class="n" id="ov-n"></div><div class="sub" id="ov-sub"></div></div>
-<div class="hint" id="hint" hidden>Tryck på skärmen för att visa knapparna</div>
+<div id="undo" hidden><span id="undo-t"></span><button type="button" id="undo-b">Ångra</button></div>
 
 <script>
 (() => {
@@ -323,9 +343,10 @@ $('w-title').textContent = WOD.title; $('w-format').textContent = WOD.format;
 $('w-pick').innerHTML = WODS.map(w => `<option value="${w.id}"${w.id === WOD.id ? ' selected' : ''}>${esc(w.title)}</option>`).join('');
 $('w-pick').addEventListener('change', e => { try { localStorage.setItem('pace-pass-sel', e.target.value); } catch (x) {} location.hash = e.target.value; location.reload(); });
 
-// Tidslinje
+// Tidslinje (långa namn förkortas till initialer, t.ex. Burpee over plate → BOP)
+const shortName = n => n.length > 8 && /\s/.test(n) ? n.split(/\s+/).map(w => w[0]).join('').toUpperCase() : n;
 const tl = $('tl');
-tl.insertAdjacentHTML('afterbegin', B.map((b, i) => `<div class="seg" data-i="${i}" style="flex:${dur(i)};--sc:${colorOf(b)}">${esc(b.rest ? 'Vila' : b.name)}</div>`).join(''));
+tl.insertAdjacentHTML('afterbegin', B.map((b, i) => `<div class="seg" data-i="${i}" style="flex:${dur(i)};--sc:${colorOf(b)}">${esc(b.rest ? 'Vila' : shortName(b.name))}</div>`).join(''));
 const segs = [...tl.querySelectorAll('.seg')];
 const marks = [0, ...B.map((b, i) => before(i + 1))];
 $('ticks').innerHTML = [...new Set(marks)].map(m => `<span style="position:absolute;left:${m / TOTAL * 100}%;transform:translateX(${m === 0 ? '0' : m === TOTAL ? '-100%' : '-50%'})">${m / 60}</span>`).join('');
@@ -355,6 +376,9 @@ function renderBlock(i) {
   $('b-moves').classList.toggle('roomy', b.moves.length <= 2 && !b.rest);
   $('b-moves').innerHTML = b.moves.map(m => typeof m === 'string' ? `<li>${esc(m)}</li>` : `<li class="sub">${esc(m.sub)}</li>`).join('');
   $('b-note').textContent = b.note || '';
+  $('b-tag').closest('.card').classList.toggle('roomy', b.moves.length <= 2 && !b.rest);
+  const nb = B[i + 1], nw = nb && typeof nb.moves[0] === 'string' && !nb.rest ? nb.moves[0] : '';
+  $('b-up').innerHTML = nb ? `<span>Sedan</span><b>${esc(nb.name)}${nw ? `<small>${esc(nw)}</small>` : ''}</b>` : '';
   $('t-rounds').hidden = !b.rounds;
   if (b.rounds) $('t-rounds').innerHTML = Array.from({ length: b.rounds }, (_, k) => `<i>${k + 1}</i>`).join('');
 }
@@ -430,6 +454,7 @@ function tick() {
   $('b-start').textContent = sel ? `▶ Starta från ${B[sel].name} (10 s)` : '▶ Starta med nedräkning (10 s)';
   $('b-now').textContent = sel ? `⚡ Starta direkt från ${B[sel].name}` : '⚡ Starta direkt';
   $('b-pause').textContent = st.pausedAt ? '▶ Fortsätt' : '❚❚ Paus';
+  document.body.classList.toggle('paused', !!st.pausedAt);
 
   if (!started()) { preview(sel); return; }
   const inSeq = (nowMs() - st.seqStart) / 1000;
@@ -475,7 +500,7 @@ function tick() {
     [...$('t-rounds').children].forEach((el, k) => el.className = k < r ? 'done' : k === r ? 'now' : '');
     if (r !== shownRound) { if (shownRound !== -1) { beepLong(); flashCard(b.tag, '', `ROND ${r + 1}`, colorOf(b), 1600); } shownRound = r; }
   }
-  $('t-lbl').textContent = lbl;
+  $('t-lbl').textContent = st.pausedAt ? '❚❚ Pausad' : lbl;
   $('t-big').textContent = fmt(left);
   $('t-big').classList.toggle('hot', left <= 10);
   const sLeft = Math.ceil(left);
@@ -527,10 +552,22 @@ function jumpTo(i) {
   ac(); $('ov').hidden = true; clearTimeout(ovT);
   if (!started()) { sel = i; tick(); return; }              // innan start: välj var passet ska börja
   const now = nowMs();
+  const snap = { st: JSON.parse(JSON.stringify(st)) };   // för Ångra
   if ((now - st.seqStart) < 0) { st.seqStart = now; st.workStart = now; lastBeep = 'go'; }   // hoppa förbi nedräkningen
   st.seq = i; st.seqStart = now; st.finished = null;
   save(); tick(); hideSoon(); wake();
+  offerUndo(`Hoppade till ${B[i].name}`, snap);
 }
+let undoT, undoSnap;
+function offerUndo(text, snap) {
+  undoSnap = snap; $('undo-t').textContent = text; $('undo').hidden = false;
+  clearTimeout(undoT); undoT = setTimeout(() => { $('undo').hidden = true; undoSnap = null; }, 7000);
+}
+$('undo-b').addEventListener('click', () => {
+  if (!undoSnap) return;
+  st = undoSnap.st;   // tillbaka som om hoppet aldrig hände: klockan har gått vidare under tiden
+  save(); shownBlock = -1; lastBeep = 'go'; $('ov').hidden = true; clearTimeout(ovT); $('undo').hidden = true; undoSnap = null; tick();
+});
 $('b-next').addEventListener('click', () => jumpTo((started() ? st.seq : sel) + 1));
 $('b-prev').addEventListener('click', () => {
   if (!started()) { jumpTo(sel - 1); return; }
@@ -581,6 +618,16 @@ function renderResults() {
 $('tab-timer').addEventListener('click', () => showTab('timer'));
 $('tab-res').addEventListener('click', () => showTab('res'));
 $('rs-close').addEventListener('click', () => showTab('timer'));
+$('rs-csv').addEventListener('click', () => {   // alla sparade pass som en fil (öppnas i Excel/Numbers)
+  const q = x => `"${String(x).replace(/"/g, '""')}"`, rows = [['Datum', 'Pass', 'Sekvens', 'Upplägg', 'Tid (s)', 'Tid'].map(q).join(';')];
+  for (const h of hist) for (const i of Object.keys(h.results).map(Number).sort((a, b) => a - b)) {
+    const b = B[i]; if (!b) continue;
+    const work = h.edits && h.edits[b.name] ? h.edits[b.name][0] : b.moves[0];
+    rows.push([new Date(h.date).toLocaleString('sv-SE'), WOD.title, (/^Varv (\d+)/.exec(b.tag) ? 'V' + /^Varv (\d+)/.exec(b.tag)[1] + ' ' : '') + b.name, typeof work === 'string' ? work : '', Math.round(h.results[i]), fmtS(h.results[i])].map(q).join(';'));
+  }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['\ufeff' + rows.join('\n')], { type: 'text/csv' })); a.download = `pass-resultat-${WOD.id}.csv`;
+  document.body.appendChild(a); a.click(); a.remove();
+});
 $('rs-list').addEventListener('click', e => {
   const b = e.target.closest('.rs-del'); if (!b) return;
   if (!b.dataset.sure) { b.dataset.sure = '1'; b.textContent = 'Tryck igen för att ta bort'; return; }
@@ -596,7 +643,7 @@ function groups() {   // en rad per unikt sekvensnamn (t.ex. Row gäller båda v
 function openEditor() {
   $('ed-list').innerHTML = groups().map(({ name, i, b, n }) => `<div class="ed-row" style="--sc:${colorOf(b)}">
     <div class="nm">${esc(name)}<small>${n > 1 ? `Gäller alla ${n} varv` : esc(b.tag)}</small></div>
-    <div class="fs">${b.moves.map((m, k) => { const sub = typeof m !== 'string', v = sub ? m.sub : m, o = ORIG[i][k], ov = o == null ? '' : typeof o === 'string' ? o : o.sub;
+    <div class="fs">${b.moves.map((m, k) => { if (typeof m !== 'string' && m.sub === 'Vila resten av tiden') return ''; const sub = typeof m !== 'string', v = sub ? m.sub : m, o = ORIG[i][k], ov = o == null ? '' : typeof o === 'string' ? o : o.sub;
       return `<input id="ed-${i}-${k}" type="text" class="${sub ? 'sub' : ''}${v !== ov ? ' chg' : ''}" data-name="${esc(name)}" data-k="${k}" value="${esc(v)}" aria-label="${esc(name)} rad ${k + 1}">`; }).join('')}</div>
   </div>`).join('');
   $('ed').hidden = false;
@@ -621,7 +668,7 @@ $('ed-reset').addEventListener('click', e => {
   edits = {}; try { localStorage.removeItem(OKEY); } catch (x) {}
   applyEdits(); openEditor(); if (shownBlock !== 'sum') { const cur = started() ? st.seq : sel; renderBlock(cur); shownBlock = cur; }
 });
-document.addEventListener('pointerdown', e => { ac(); if (!e.target.closest('.ctl') && !e.target.closest('.tl') && !e.target.closest('#b-done') && !e.target.closest('#ed') && !e.target.closest('#rs') && !e.target.closest('.tabs')) { $('ctl').classList.remove('hide'); hideSoon(); } });
+document.addEventListener('pointerdown', e => { ac(); if (!e.target.closest('.ctl') && !e.target.closest('.tl') && !e.target.closest('#b-done') && !e.target.closest('#ed') && !e.target.closest('#rs') && !e.target.closest('.tabs') && !e.target.closest('#undo')) { $('ctl').classList.remove('hide'); hideSoon(); } });
 const wake = () => navigator.wakeLock?.request('screen').catch(() => {});
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') wake(); });
 tick(); if (started()) hideSoon();

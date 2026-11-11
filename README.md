@@ -39,6 +39,8 @@ En webbapp för iPad, i en enda fil (`index.html`). Ingen installation och inga 
 - **Sekvenser:** passet är en rad sekvenser med egen nedräkning. Hoppar du till en sekvens, till exempel Burpees, startar den från början och resten av passet följer efter i ordning. Totaltiden fortsätter att räkna. Hoppa med *Nästa ⏭* och *⏮ Föregående* (ett tryck = sekvensens början, ett till inom 3 s = sekvensen innan), eller tryck på en sekvens i tidslinjen.
 - **Starta var som helst:** innan start väljer du startsekvens genom att trycka i tidslinjen, och knappen visar då *Starta från …*.
 - **Resultat-fliken:** uppe till höger finns *Timer* och *Resultat*. Under Resultat listas alla pass (senaste överst) med totaltid, splittider per sekvens, +/− mot förra gången, förra tiden och ★ Rekord. Ett pass kan tas bort.
+- **Hopp kan ångras:** efter ett hopp visas *Ångra* i 7 sekunder. Paus visas tydligt som *PAUSAD*. När knapparna är gömda står *Tryck på skärmen för knappar*. Timern fungerar även i stående läge och på mobil.
+- **Exportera CSV** under Resultat sparar alla tider som en fil.
 - **Ändra upplägg:** knappen ✎ öppnar en lista där du ändrar vikter, distanser och reps för varje sekvens (t.ex. "7 reps @ 100/70 kg" eller "750 m"). Ändringen gäller alla varv, sparas på enheten och kan återställas.
 - **Starta direkt:** knappen ⚡ startar klockan utan 10 s nedräkning.
 - **Klar-knapp och jämförelse:** tryck **✓ Klar** när du är klar med en sekvens, så sparas tiden (tryck *Ångra klar* om det blev fel). Under knappen visas förra gången och bästa tid, med +/− och *Nytt rekord!*. Efter passet visas *Dina tider* med jämförelse. Varje genomfört pass sparas i historiken på enheten (även vid *Börja om*).
