@@ -112,6 +112,20 @@ body.fin .bname{font-size:calc(var(--u)*4)}
 #ov.pop .n{animation:slam .5s cubic-bezier(.15,1.15,.35,1)}
 @keyframes slam{from{transform:scale(1.35);opacity:.4}to{transform:none;opacity:1}}
 #ov .sub{font-size:clamp(14px,2.2vmin,24px);color:var(--muted);font-weight:600}
+#ed{position:fixed;inset:0;z-index:60;background:rgba(5,8,15,.82);display:grid;place-items:center;padding:16px max(16px,env(safe-area-inset-right,0px)) 16px max(16px,env(safe-area-inset-left,0px));cursor:auto}
+.ed-box{width:min(100%,980px);max-height:100%;display:grid;grid-template-rows:auto 1fr auto;gap:14px;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:20px;min-height:0}
+.ed-h{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.ed-h b{display:block;font-family:var(--font-display);font-weight:900;text-transform:uppercase;font-size:28px;line-height:1}
+.ed-h span{display:block;color:var(--muted);font-size:14px;margin-top:6px;max-width:60ch}
+.ed-list{overflow:auto;display:grid;gap:10px;min-height:0;padding-right:4px}
+.ed-row{display:grid;grid-template-columns:200px minmax(0,1fr);gap:12px;align-items:start;padding:12px;border-radius:12px;background:var(--panel-2);border-left:5px solid var(--sc)}
+.ed-row .nm{font-family:var(--font-display);font-weight:800;text-transform:uppercase;font-size:22px;line-height:1.1}
+.ed-row .nm small{display:block;font-family:var(--font-body);font-weight:600;font-size:12px;letter-spacing:.06em;color:var(--muted);text-transform:none;margin-top:4px}
+.ed-row .fs{display:grid;gap:6px}
+.ed-row input{width:100%;min-height:44px;background:var(--ink);border:1px solid var(--line);border-radius:10px;padding:8px 12px;font:inherit;font-size:17px;color:var(--text)}
+.ed-row input.sub{font-size:15px;color:var(--muted)}
+.ed-row input.chg{border-color:var(--b3)}
+@media (max-width:640px){.ed-row{grid-template-columns:1fr}}
 .hint{position:fixed;left:50%;bottom:calc(var(--u)*9);transform:translateX(-50%);background:rgba(0,0,0,.65);padding:8px 14px;border-radius:999px;font-size:13px;color:#fff;transition:opacity .5s;pointer-events:none}
 [hidden]{display:none!important}
 @media (max-aspect-ratio:1/1){.main{grid-template-columns:1fr;grid-template-rows:auto auto}.big{font-size:calc(var(--u)*24)}.brand .t span{display:none}}
@@ -148,11 +162,20 @@ body.fin .bname{font-size:calc(var(--u)*4)}
       <select class="btn" id="w-pick" aria-label="Välj pass"></select>
       <button class="btn go" type="button" id="b-start">▶ Starta passet (10 s nedräkning)</button>
       <button class="btn go" type="button" id="b-now">⚡ Starta direkt</button>
+      <button class="btn" type="button" id="b-edit">✎ Ändra upplägg</button>
       <button class="btn" type="button" id="b-prev" aria-label="Föregående block">⏮ Föregående</button>
       <button class="btn" type="button" id="b-pause" hidden>❚❚ Paus</button>
       <button class="btn" type="button" id="b-next" aria-label="Nästa block">Nästa ⏭</button>
       <button class="btn danger" type="button" id="b-reset" hidden>↺ Börja om</button>
     </div>
+  </div>
+</div>
+<div id="ed" hidden role="dialog" aria-label="Ändra upplägg">
+  <div class="ed-box">
+    <div class="ed-h"><div><b>Ändra upplägg</b><span>Ändra vikter, distanser och reps. Det sparas på den här enheten och gäller alla varv.</span></div>
+      <button class="btn" type="button" id="ed-close">Klar</button></div>
+    <div class="ed-list" id="ed-list"></div>
+    <div class="ed-f"><button class="btn danger" type="button" id="ed-reset">↺ Återställ originalet</button></div>
   </div>
 </div>
 <div id="ov" hidden><div class="l1" id="ov-l1"></div><div class="l2" id="ov-l2"></div><div class="n" id="ov-n"></div><div class="sub" id="ov-sub"></div></div>
@@ -220,6 +243,13 @@ const fmt = s => { s = Math.max(0, Math.ceil(s)); return `${Math.floor(s / 60)}:
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const colorOf = b => `var(--${b.color})`;
 const CD = 10;   // sekunders nedräkning före start
+// Egna ändringar av upplägget (vikter, distanser, reps) – sparas per pass på enheten, gäller alla block med samma namn
+const OKEY = 'pace-pass-edit-' + WOD.id;
+const ORIG = WOD.blocks.map(b => JSON.parse(JSON.stringify(b.moves)));
+let edits = {};
+try { edits = JSON.parse(localStorage.getItem(OKEY) || '{}'); } catch (e) {}
+function applyEdits() { WOD.blocks.forEach((b, i) => { b.moves = edits[b.name] ? JSON.parse(JSON.stringify(edits[b.name])) : JSON.parse(JSON.stringify(ORIG[i])); }); }
+applyEdits();
 const B = WOD.blocks, N = B.length;
 const dur = i => B[i].to - B[i].from;               // sekvensens längd i sekunder
 const TOTAL = B.reduce((n, b, i) => n + dur(i), 0);
@@ -474,7 +504,41 @@ $('b-prev').addEventListener('click', () => {
   jumpTo(inSeq > 3 && !st.finished ? st.seq : st.seq - 1);   // ett tryck = sekvensens början, inom 3 s = sekvensen innan
 });
 segs.forEach((el, k) => el.addEventListener('click', () => jumpTo(k)));
-document.addEventListener('pointerdown', e => { ac(); if (!e.target.closest('.ctl') && !e.target.closest('.tl') && !e.target.closest('#b-done')) { $('ctl').classList.remove('hide'); hideSoon(); } });
+// Redigering av upplägget
+function groups() {   // en rad per unikt sekvensnamn (t.ex. Row gäller båda varven)
+  const seen = new Map();
+  B.forEach((b, i) => { if (!b.rest && !seen.has(b.name)) seen.set(b.name, i); });
+  return [...seen].map(([name, i]) => ({ name, i, b: B[i], n: B.filter(x => x.name === name).length }));
+}
+function openEditor() {
+  $('ed-list').innerHTML = groups().map(({ name, i, b, n }) => `<div class="ed-row" style="--sc:${colorOf(b)}">
+    <div class="nm">${esc(name)}<small>${n > 1 ? `Gäller alla ${n} varv` : esc(b.tag)}</small></div>
+    <div class="fs">${b.moves.map((m, k) => { const sub = typeof m !== 'string', v = sub ? m.sub : m, o = ORIG[i][k], ov = o == null ? '' : typeof o === 'string' ? o : o.sub;
+      return `<input id="ed-${i}-${k}" type="text" class="${sub ? 'sub' : ''}${v !== ov ? ' chg' : ''}" data-name="${esc(name)}" data-k="${k}" value="${esc(v)}" aria-label="${esc(name)} rad ${k + 1}">`; }).join('')}</div>
+  </div>`).join('');
+  $('ed').hidden = false;
+}
+$('ed-list').addEventListener('input', e => {
+  const el = e.target; if (!el.dataset.name) return;
+  const name = el.dataset.name, k = +el.dataset.k, i = B.findIndex(b => b.name === name);
+  const moves = JSON.parse(JSON.stringify(B[i].moves));
+  moves[k] = typeof moves[k] === 'string' ? el.value : { sub: el.value };
+  edits[name] = moves;
+  if (JSON.stringify(moves) === JSON.stringify(ORIG[i])) delete edits[name];
+  try { localStorage.setItem(OKEY, JSON.stringify(edits)); } catch (x) {}
+  applyEdits(); el.classList.toggle('chg', !!edits[name]);
+  if (shownBlock !== 'sum') { const cur = started() ? st.seq : sel; renderBlock(cur); shownBlock = cur; }
+});
+$('b-edit').addEventListener('click', openEditor);
+$('ed-close').addEventListener('click', () => { $('ed').hidden = true; });
+$('ed-reset').addEventListener('click', e => {
+  const b = e.currentTarget;
+  if (!b.dataset.sure) { b.dataset.sure = '1'; b.textContent = 'Tryck igen för att återställa'; setTimeout(() => { b.dataset.sure = ''; b.textContent = '↺ Återställ originalet'; }, 3000); return; }
+  b.dataset.sure = ''; b.textContent = '↺ Återställ originalet';
+  edits = {}; try { localStorage.removeItem(OKEY); } catch (x) {}
+  applyEdits(); openEditor(); if (shownBlock !== 'sum') { const cur = started() ? st.seq : sel; renderBlock(cur); shownBlock = cur; }
+});
+document.addEventListener('pointerdown', e => { ac(); if (!e.target.closest('.ctl') && !e.target.closest('.tl') && !e.target.closest('#b-done') && !e.target.closest('#ed')) { $('ctl').classList.remove('hide'); hideSoon(); } });
 const wake = () => navigator.wakeLock?.request('screen').catch(() => {});
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') wake(); });
 tick(); if (started()) hideSoon();
