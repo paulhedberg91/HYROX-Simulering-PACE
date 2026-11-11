@@ -188,7 +188,7 @@ body.fin .bname{font-size:calc(var(--u)*4)}
 // Stationspass: varje station har ett fast tidsfönster – gör jobbet och vila resten av tiden
 const ST = [
   [3, 'Row', '500 m', 'b1'], [2, 'DL', '7 reps', 'b2'], [2, 'R-L', '14 reps', 'b2'], [3, 'Ski', '500 m', 'b1'],
-  [2, 'S-Press', '7 reps', 'b2'], [2, 'Burpee Place', '14 reps', 'b2'], [3, 'Bike', '1000 m', 'b1'], [3, 'Run', '300–400 m', 'b4'],
+  [2, 'S-Press', '7 reps', 'b2'], [2, 'Burpee over plate', '14 reps', 'b2'], [3, 'Bike', '1000 m', 'b1'], [3, 'Run', '300–400 m', 'b4'],
 ];
 function stationBlocks(rounds, restMin) {
   const out = []; let t = 0;
@@ -248,6 +248,7 @@ const OKEY = 'pace-pass-edit-' + WOD.id;
 const ORIG = WOD.blocks.map(b => JSON.parse(JSON.stringify(b.moves)));
 let edits = {};
 try { edits = JSON.parse(localStorage.getItem(OKEY) || '{}'); } catch (e) {}
+if (edits['Burpee Place']) { edits['Burpee over plate'] = edits['Burpee Place']; delete edits['Burpee Place']; }   // gammalt namn
 function applyEdits() { WOD.blocks.forEach((b, i) => { b.moves = edits[b.name] ? JSON.parse(JSON.stringify(edits[b.name])) : JSON.parse(JSON.stringify(ORIG[i])); }); }
 applyEdits();
 const B = WOD.blocks, N = B.length;
